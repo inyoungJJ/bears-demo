@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4a90d9;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#2baa5e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#4a90d9;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#2baa5e;stop-opacity:0.3" />
+    </linearGradient>
+  </defs>
+
+  <!-- Bear head icon - geometric/low-poly style -->
+  <g transform="translate(16, 10)">
+    <!-- Ears -->
+    <circle cx="22" cy="18" r="14" fill="none" stroke="url(#grad1)" stroke-width="2.5" opacity="0.7"/>
+    <circle cx="78" cy="18" r="14" fill="none" stroke="url(#grad1)" stroke-width="2.5" opacity="0.7"/>
+    <!-- Head outline -->
+    <path d="M50 8 L82 25 L88 58 L75 82 L50 92 L25 82 L12 58 L18 25 Z"
+          fill="none" stroke="url(#grad1)" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Inner mesh lines (electrode mesh feel) -->
+    <line x1="50" y1="8" x2="50" y2="92" stroke="url(#grad1)" stroke-width="0.8" opacity="0.3"/>
+    <line x1="18" y1="25" x2="82" y2="25" stroke="url(#grad1)" stroke-width="0.8" opacity="0.3"/>
+    <line x1="12" y1="58" x2="88" y2="58" stroke="url(#grad1)" stroke-width="0.8" opacity="0.3"/>
+    <line x1="18" y1="25" x2="75" y2="82" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <line x1="82" y1="25" x2="25" y2="82" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <line x1="50" y1="8" x2="12" y2="58" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <line x1="50" y1="8" x2="88" y2="58" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <line x1="25" y1="82" x2="88" y2="58" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <line x1="75" y1="82" x2="12" y2="58" stroke="url(#grad1)" stroke-width="0.5" opacity="0.2"/>
+    <!-- Eyes -->
+    <circle cx="36" cy="45" r="5" fill="url(#grad1)" opacity="0.9"/>
+    <circle cx="64" cy="45" r="5" fill="url(#grad1)" opacity="0.9"/>
+    <!-- Nose -->
+    <path d="M45 62 L55 62 L50 68 Z" fill="url(#grad1)" opacity="0.7"/>
+    <!-- Mesh vertices (nodes) -->
+    <circle cx="50" cy="8" r="2.5" fill="#4a90d9"/>
+    <circle cx="82" cy="25" r="2.5" fill="#3a9a6e"/>
+    <circle cx="88" cy="58" r="2.5" fill="#2baa5e"/>
+    <circle cx="75" cy="82" r="2.5" fill="#2baa5e"/>
+    <circle cx="50" cy="92" r="2.5" fill="#3a9a6e"/>
+    <circle cx="25" cy="82" r="2.5" fill="#4a90d9"/>
+    <circle cx="12" cy="58" r="2.5" fill="#4a90d9"/>
+    <circle cx="18" cy="25" r="2.5" fill="#4a90d9"/>
+    <!-- +/- symbols on ears -->
+    <text x="18" y="22" font-family="Arial" font-size="12" font-weight="bold" fill="#4a90d9" text-anchor="middle" opacity="0.8">-</text>
+    <text x="82" y="22" font-family="Arial" font-size="12" font-weight="bold" fill="#2baa5e" text-anchor="middle" opacity="0.8">+</text>
+  </g>
+
+  <!-- Text -->
+  <text x="130" y="55" font-family="Inter, Arial, sans-serif" font-size="48" font-weight="800" letter-spacing="-1" fill="url(#grad1)">BEARS</text>
+  <text x="130" y="78" font-family="Inter, Arial, sans-serif" font-size="12.5" font-weight="400" fill="#8888aa" letter-spacing="0.5">Battery Electrode AI Research System</text>
+
+  <!-- Subtle underline accent -->
+  <rect x="130" y="85" width="240" height="1.5" rx="1" fill="url(#grad2)"/>
+</svg>

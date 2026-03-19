@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEARS - Battery Electrode AI Research System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #06060f;
+            --bg-card: rgba(18, 18, 42, 0.6);
+            --accent: #4a90d9;
+            --accent2: #2baa5e;
+            --accent3: #e06522;
+            --accent4: #a050c8;
+            --text: #e8e8f0;
+            --text-dim: #7a7a9a;
+            --border: rgba(74, 144, 217, 0.12);
+            --glow: rgba(74, 144, 217, 0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Glow orbs */
+        .glow-orb {
+            position: fixed; border-radius: 50%; filter: blur(120px);
+            pointer-events: none; z-index: 0;
+        }
+        .glow-orb.blue { width: 500px; height: 500px; background: rgba(74,144,217,0.07); top: -100px; left: -100px; }
+        .glow-orb.green { width: 400px; height: 400px; background: rgba(43,170,94,0.06); bottom: 10%; right: -50px; }
+        .glow-orb.purple { width: 350px; height: 350px; background: rgba(160,80,200,0.05); top: 50%; left: 30%; }
+
+        .content { position: relative; z-index: 1; }
+
+        /* Nav */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 32px;
+            background: rgba(6,6,15,0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+        }
+        .nav-logos {
+            display: flex; align-items: center; gap: 20px;
+        }
+        .nav-logos img { height: 40px; opacity: 0.85; }
+        .nav-logos img.cau-logo { height: 28px; }
+        .nav-links {
+            display: flex; gap: 28px;
+        }
+        .nav-links a {
+            color: var(--text-dim); text-decoration: none;
+            font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover { color: var(--text); }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center; padding: 80px 20px 40px;
+        }
+        .hero-badge {
+            display: inline-block; padding: 6px 20px;
+            background: rgba(74,144,217,0.1);
+            border: 1px solid rgba(74,144,217,0.2);
+            border-radius: 24px; font-size: 12px; font-weight: 500;
+            color: var(--accent); letter-spacing: 1px;
+            text-transform: uppercase; margin-bottom: 32px;
+            animation: fadeInUp 0.8s ease;
+        }
+        .hero-logo {
+            width: min(380px, 65vw); margin-bottom: 28px;
+            animation: fadeInUp 0.8s 0.1s ease both;
+            filter: drop-shadow(0 0 48px rgba(74,144,217,0.2));
+        }
+        .hero .tagline {
+            font-size: clamp(18px, 3vw, 26px); font-weight: 300;
+            color: var(--text-dim); max-width: 600px;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.8s 0.2s ease both;
+        }
+        .hero .authors {
+            font-size: 14px; color: var(--text-dim);
+            animation: fadeInUp 0.8s 0.3s ease both;
+        }
+        .hero .affiliation {
+            font-size: 13px; color: #555570; margin-top: 4px;
+            animation: fadeInUp 0.8s 0.35s ease both;
+        }
+        .scroll-hint {
+            position: absolute; bottom: 32px;
+            animation: bounce 2s infinite;
+            color: var(--text-dim); font-size: 24px;
+        }
+
+        /* Stats */
+        .stats-bar {
+            display: flex; justify-content: center; gap: 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(20px);
+            background: rgba(10,10,20,0.8);
+        }
+        .stat {
+            flex: 1; max-width: 180px;
+            text-align: center; padding: 28px 16px;
+            border-right: 1px solid var(--border);
+            transition: background 0.3s;
+        }
+        .stat:last-child { border-right: none; }
+        .stat:hover { background: var(--glow); }
+        .stat-num {
+            font-size: 32px; font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-label {
+            font-size: 11px; font-weight: 500; color: var(--text-dim);
+            text-transform: uppercase; letter-spacing: 1.5px; margin-top: 4px;
+        }
+
+        /* Sections */
+        .section {
+            max-width: 1200px; margin: 0 auto;
+            padding: 80px 20px;
+        }
+        .section-header { text-align: center; margin-bottom: 56px; }
+        .section-label {
+            font-size: 12px; font-weight: 600; color: var(--accent);
+            text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px;
+        }
+        .section-title {
+            font-size: clamp(24px, 4vw, 36px); font-weight: 700; margin-bottom: 12px;
+        }
+        .section-sub {
+            font-size: 15px; color: var(--text-dim); max-width: 600px; margin: 0 auto;
+        }
+
+        /* Pipeline */
+        .pipeline {
+            display: flex; align-items: stretch; gap: 12px;
+            overflow-x: auto; padding-bottom: 16px;
+        }
+        .pipe-step {
+            flex: 1; min-width: 180px;
+            background: var(--bg-card); backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 16px;
+            padding: 28px 20px; text-align: center; position: relative;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .pipe-step:hover {
+            border-color: var(--accent); transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(74,144,217,0.12);
+        }
+        .pipe-num {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg, rgba(74,144,217,0.2), rgba(43,170,94,0.2));
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 16px; color: var(--accent); margin-bottom: 16px;
+        }
+        .pipe-step h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+        .pipe-step p { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+        .pipe-arrow {
+            display: flex; align-items: center; color: var(--accent);
+            font-size: 18px; opacity: 0.4; flex-shrink: 0;
+        }
+
+        /* Architecture placeholder */
+        .arch-box {
+            max-width: 900px; margin: 0 auto; aspect-ratio: 16/8;
+            background: var(--bg-card); backdrop-filter: blur(16px);
+            border: 1px dashed rgba(74,144,217,0.2); border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-dim); font-size: 16px;
+        }
+
+        /* Video grid */
+        .vid-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+        .vid-card {
+            background: var(--bg-card); backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 16px; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .vid-card:hover {
+            border-color: var(--accent); transform: translateY(-4px);
+            box-shadow: 0 8px 32px rgba(74,144,217,0.1);
+        }
+        .vid-thumb {
+            width: 100%; aspect-ratio: 16/9;
+            background: linear-gradient(135deg, #10102a 0%, #08081a 100%);
+            display: flex; align-items: center; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        .vid-thumb::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(74,144,217,0.08) 0%, transparent 70%);
+        }
+        .play-btn {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: rgba(74,144,217,0.15); border: 2px solid rgba(74,144,217,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px; color: var(--accent);
+            transition: all 0.3s; cursor: pointer; z-index: 1;
+        }
+        .play-btn:hover {
+            background: rgba(74,144,217,0.3); transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(74,144,217,0.3);
+        }
+        .vid-body { padding: 20px; }
+        .vid-tag {
+            display: inline-block; padding: 3px 10px; border-radius: 8px;
+            font-size: 10px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; margin-bottom: 8px;
+        }
+        .t-pipe { background: rgba(74,144,217,0.12); color: var(--accent); }
+        .t-blend { background: rgba(43,170,94,0.12); color: var(--accent2); }
+        .t-comsol { background: rgba(224,101,34,0.12); color: var(--accent3); }
+        .t-sem { background: rgba(160,80,200,0.12); color: var(--accent4); }
+        .vid-body h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .vid-body p { font-size: 12px; color: var(--text-dim); }
+        .vid-body .dur { font-size: 11px; color: #444460; margin-top: 8px; }
+
+        /* Team */
+        .team-grid {
+            display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
+        }
+        .team-card {
+            width: 280px;
+            background: var(--bg-card); backdrop-filter: blur(16px);
+            border: 1px solid var(--border); border-radius: 20px;
+            padding: 36px 24px; text-align: center;
+            transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+        }
+        .team-card:hover {
+            border-color: var(--accent); transform: translateY(-6px);
+            box-shadow: 0 12px 40px rgba(74,144,217,0.1);
+        }
+        .team-photo {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: linear-gradient(135deg, rgba(74,144,217,0.2), rgba(43,170,94,0.2));
+            margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;
+            font-size: 36px; color: var(--accent); overflow: hidden;
+            border: 3px solid rgba(74,144,217,0.2);
+        }
+        .team-photo img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .team-card .name {
+            font-size: 18px; font-weight: 700; margin-bottom: 4px;
+        }
+        .team-card .role {
+            font-size: 12px; color: var(--accent); font-weight: 600;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+        }
+        .team-card .bio {
+            font-size: 13px; color: var(--text-dim); margin-bottom: 16px; line-height: 1.5;
+        }
+        .team-links {
+            display: flex; justify-content: center; gap: 12px;
+        }
+        .team-links a {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 5px 12px; border-radius: 8px; font-size: 11px; font-weight: 500;
+            color: var(--text-dim); background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            text-decoration: none; transition: all 0.3s;
+        }
+        .team-links a:hover {
+            color: var(--accent); border-color: rgba(74,144,217,0.3);
+            background: rgba(74,144,217,0.08);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center; padding: 48px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13px; color: #444460;
+        }
+        .footer-logos {
+            display: flex; justify-content: center; align-items: center;
+            gap: 32px; margin-bottom: 20px; opacity: 0.6;
+        }
+        .footer-logos img { height: 44px; }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+        .fade-in {
+            opacity: 0; transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4,0,0.2,1);
+        }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            nav { padding: 12px 16px; }
+            .nav-links { gap: 16px; }
+            .stats-bar { flex-wrap: wrap; }
+            .stat { min-width: 33%; border-bottom: 1px solid var(--border); }
+            .pipeline { flex-direction: column; }
+            .pipe-arrow { transform: rotate(90deg); justify-content: center; }
+            .vid-grid { grid-template-columns: 1fr; }
+            .team-grid { gap: 20px; }
+            .team-card { width: 100%; max-width: 320px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Background effects -->
+<div class="glow-orb blue"></div>
+<div class="glow-orb green"></div>
+<div class="glow-orb purple"></div>
+
+<div class="content">
+
+<!-- Nav -->
+<nav>
+    <div class="nav-logos">
+        <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+        <img src="memlab_logo.png" alt="MEMLab">
+    </div>
+    <div class="nav-links">
+        <a href="#pipeline">Pipeline</a>
+        <a href="#demos">Demos</a>
+        <a href="#team">Team</a>
+        <a href="https://github.com/inyoungJJ/BEARS" target="_blank">GitHub</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-badge">Conference Demo 2026</div>
+    <img src="bears_logo.png" alt="BEARS" class="hero-logo">
+    <p class="tagline">From SEM imaging to 3D electrochemical simulation<br>Fully automated by multi-agent AI</p>
+    <p class="authors">Inyoung Jeong, Hyunseok Song, JangHyuk Moon*</p>
+    <p class="affiliation">School of Energy Systems Engineering, Chung-Ang University</p>
+    <div class="scroll-hint">&#8595;</div>
+</section>
+
+<!-- Stats -->
+<div class="stats-bar">
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Stages</div></div>
+    <div class="stat"><div class="stat-num">24+</div><div class="stat-label">Skills</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-label">Agents</div></div>
+    <div class="stat"><div class="stat-num">3</div><div class="stat-label">MCP Tools</div></div>
+    <div class="stat"><div class="stat-num">8</div><div class="stat-label">Metrics</div></div>
+</div>
+
+<!-- Pipeline -->
+<section class="section fade-in" id="pipeline">
+    <div class="section-header">
+        <div class="section-label">Pipeline</div>
+        <h2 class="section-title">End-to-End Automation</h2>
+        <p class="section-sub">A single SEM image is all you need. BEARS handles every step from particle segmentation to electrochemical simulation.</p>
+    </div>
+    <div class="pipeline">
+        <div class="pipe-step">
+            <div class="pipe-num">1</div>
+            <h3>Grain Segmentation</h3>
+            <p>SEM image to individual particle masks via automated segmentation</p>
+        </div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step">
+            <div class="pipe-num">2</div>
+            <h3>3D Reconstruction</h3>
+            <p>Single-image-to-3D via multi-model ensemble</p>
+        </div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step">
+            <div class="pipe-num">3</div>
+            <h3>Numerical Model</h3>
+            <p>Mesh repair, packing, calendering, DXF/STL export</p>
+        </div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step">
+            <div class="pipe-num">4</div>
+            <h3>Validation</h3>
+            <p>Porosity, tortuosity, PSD, surface area &mdash; 8 metrics</p>
+        </div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step">
+            <div class="pipe-num">5</div>
+            <h3>3D Simulation</h3>
+            <p>COMSOL FEM: heterogeneous transport in real 3D geometry</p>
+        </div>
+    </div>
+</section>
+
+<!-- Architecture -->
+<section class="section fade-in" style="padding-top: 0;">
+    <div class="section-header">
+        <div class="section-label">Architecture</div>
+        <h2 class="section-title">Skill-Based Multi-Agent System</h2>
+        <p class="section-sub">LLM handles orchestration. Deterministic tools handle computation. Connected via Model Context Protocol (MCP).</p>
+    </div>
+    <div class="arch-box">Architecture diagram &mdash; coming soon</div>
+</section>
+
+<!-- Demo Videos -->
+<section class="section fade-in" id="demos">
+    <div class="section-header">
+        <div class="section-label">Demos</div>
+        <h2 class="section-title">See It in Action</h2>
+        <p class="section-sub">Watch the fully automated pipeline run from start to finish.</p>
+    </div>
+    <div class="vid-grid">
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-pipe">Full Pipeline</span>
+                <h3>End-to-End Run</h3>
+                <p>Parameter input &rarr; packing &rarr; visualization &rarr; validation &rarr; simulation</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-blend">Blender</span>
+                <h3>3D Electrode Visualization</h3>
+                <p>Particle packing with size-based coloring and real-time rendering</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-blend">Physics</span>
+                <h3>Calendering Simulation</h3>
+                <p>Rigid body gravity settling for electrode densification</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-comsol">COMSOL</span>
+                <h3>3D Electrochemical Simulation</h3>
+                <p>Concentration and current density in real electrode geometry</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-sem">SEM-to-3D</span>
+                <h3>Particle Reconstruction</h3>
+                <p>Single SEM image to 3D mesh via multi-model ensemble</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+        <div class="vid-card">
+            <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
+            <div class="vid-body">
+                <span class="vid-tag t-pipe">MATLAB</span>
+                <h3>8-Metric Validation</h3>
+                <p>Porosity, tortuosity, PSD, surface area, connectivity</p>
+                <div class="dur">Coming soon</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team -->
+<section class="section fade-in" id="team">
+    <div class="section-header">
+        <div class="section-label">Team</div>
+        <h2 class="section-title">Researchers</h2>
+        <p class="section-sub">MEMLab, School of Energy Systems Engineering, Chung-Ang University</p>
+    </div>
+    <div class="team-grid">
+        <!-- Student 1 -->
+        <div class="team-card">
+            <div class="team-photo">
+                <!-- Replace with actual photo: <img src="photos/jeong.jpg"> -->
+                IJ
+            </div>
+            <div class="name">Inyoung Jeong</div>
+            <div class="role">M.S. Student</div>
+            <div class="bio">BEARS Framework Developer<br>Electrode Modeling &amp; Simulation</div>
+            <div class="team-links">
+                <a href="mailto:jiy000320@cau.ac.kr">Email</a>
+                <a href="https://github.com/inyoungJJ" target="_blank">GitHub</a>
+            </div>
+        </div>
+        <!-- Student 2 -->
+        <div class="team-card">
+            <div class="team-photo">
+                <!-- Replace with actual photo: <img src="photos/song.jpg"> -->
+                HS
+            </div>
+            <div class="name">Hyunseok Song</div>
+            <div class="role">M.S. Student</div>
+            <div class="bio">SEM-to-3D Pipeline<br>Particle Reconstruction</div>
+            <div class="team-links">
+                <a href="mailto:">Email</a>
+                <a href="#">GitHub</a>
+            </div>
+        </div>
+        <!-- PI -->
+        <div class="team-card">
+            <div class="team-photo">
+                <!-- Replace with actual photo: <img src="photos/moon.jpg"> -->
+                JM
+            </div>
+            <div class="name">JangHyuk Moon</div>
+            <div class="role">Professor (PI)</div>
+            <div class="bio">MEMLab Principal Investigator<br>School of Energy Systems Engineering</div>
+            <div class="team-links">
+                <a href="mailto:jhmoon@cau.ac.kr">Email</a>
+                <a href="https://sites.google.com/view/memlab/meml" target="_blank">Lab Page</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-logos">
+        <img src="cau_logo.svg" alt="Chung-Ang University">
+        <img src="memlab_logo.png" alt="MEMLab">
+    </div>
+    <p style="color: var(--text-dim);"><strong>BEARS</strong> &mdash; Battery Electrode AI Research System</p>
+    <p style="margin-top: 8px;">
+        <a href="https://github.com/inyoungJJ/BEARS" target="_blank">GitHub</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank">MEMLab</a>
+        &nbsp;&middot;&nbsp; Chung-Ang University
+    </p>
+</footer>
+
+</div>
+
+<!-- Scroll fade-in observer -->
+<script>
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+        if (e.isIntersecting) e.target.classList.add('visible');
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
