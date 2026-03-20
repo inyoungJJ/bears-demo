@@ -317,10 +317,36 @@
             50% { transform: translateY(8px); }
         }
         .fade-in {
-            opacity: 0; transform: translateY(30px);
-            transition: all 0.8s cubic-bezier(0.4,0,0.2,1);
+            opacity: 0; transform: translateY(60px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+        /* Stagger children: cards appear one by one */
+        .stagger > * {
+            opacity: 0; transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.0s; }
+        .stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.08s; }
+        .stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.16s; }
+        .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.24s; }
+        .stagger.visible > *:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.32s; }
+        .stagger.visible > *:nth-child(6) { opacity: 1; transform: none; transition-delay: 0.40s; }
+        .stagger.visible > *:nth-child(7) { opacity: 1; transform: none; transition-delay: 0.48s; }
+        .stagger.visible > *:nth-child(8) { opacity: 1; transform: none; transition-delay: 0.56s; }
+        .stagger.visible > *:nth-child(9) { opacity: 1; transform: none; transition-delay: 0.64s; }
+
+        /* Stats counter slide-up */
+        .stats-bar .stat {
+            opacity: 0; transform: translateY(24px);
+            transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .stats-bar.visible .stat:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.0s; }
+        .stats-bar.visible .stat:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.1s; }
+        .stats-bar.visible .stat:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.2s; }
+        .stats-bar.visible .stat:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.3s; }
+        .stats-bar.visible .stat:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.4s; }
 
         @media (max-width: 768px) {
             nav { padding: 12px 16px; }
@@ -370,12 +396,12 @@
 </section>
 
 <!-- Stats -->
-<div class="stats-bar">
-    <a href="#pipeline" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num">5</div><div class="stat-label">Stages</div></a>
-    <a href="agents.html#skills" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num">24+</div><div class="stat-label">Skills</div></a>
-    <a href="agents.html" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num">5</div><div class="stat-label">Agents</div></a>
-    <a href="agents.html#mcp" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num">3</div><div class="stat-label">MCP Tools</div></a>
-    <a href="agents.html#skills-validation" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num">8</div><div class="stat-label">Metrics</div></a>
+<div class="stats-bar" id="stats">
+    <a href="#pipeline" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num" data-target="5">0</div><div class="stat-label">Stages</div></a>
+    <a href="agents.html#skills" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num" data-target="24+">0</div><div class="stat-label">Skills</div></a>
+    <a href="agents.html" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num" data-target="5">0</div><div class="stat-label">Agents</div></a>
+    <a href="agents.html#mcp" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num" data-target="3">0</div><div class="stat-label">MCP Tools</div></a>
+    <a href="agents.html#skills-validation" class="stat" style="text-decoration:none;color:inherit;"><div class="stat-num" data-target="8">0</div><div class="stat-label">Metrics</div></a>
 </div>
 
 <!-- Pipeline -->
@@ -385,7 +411,7 @@
         <h2 class="section-title">End-to-End Automation</h2>
         <p class="section-sub">A single SEM image is all you need. BEARS handles every step from particle segmentation to electrochemical simulation.</p>
     </div>
-    <div class="pipeline">
+    <div class="pipeline stagger">
         <div class="pipe-step">
             <div class="pipe-num">1</div>
             <h3>Grain Segmentation</h3>
@@ -435,7 +461,7 @@
         <h2 class="section-title">See It in Action</h2>
         <p class="section-sub">Watch the fully automated pipeline run from start to finish.</p>
     </div>
-    <div class="vid-grid">
+    <div class="vid-grid stagger">
         <div class="vid-card">
             <div class="vid-thumb"><div class="play-btn">&#9654;</div></div>
             <div class="vid-body">
@@ -500,7 +526,7 @@
         <h2 class="section-title">Researchers</h2>
         <p class="section-sub">MEMLab, School of Energy Systems Engineering, Chung-Ang University</p>
     </div>
-    <div class="team-grid">
+    <div class="team-grid stagger">
         <!-- Student 1 -->
         <div class="team-card">
             <div class="team-photo">
@@ -549,7 +575,7 @@
 <footer>
     <div class="footer-logos">
         <img src="cau_logo.svg" alt="Chung-Ang University">
-        <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+        <img src="memlab_logo.png" alt="MEMLab">
     </div>
     <p style="color: var(--text-dim);"><strong>BEARS</strong> &mdash; Battery Electrode AI Research System</p>
     <p style="margin-top: 8px;">
@@ -562,14 +588,39 @@
 
 </div>
 
-<!-- Scroll fade-in observer -->
+<!-- Scroll animation engine -->
 <script>
-const observer = new IntersectionObserver((entries) => {
+const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => {
-        if (e.isIntersecting) e.target.classList.add('visible');
+        if (e.isIntersecting) {
+            e.target.classList.add('visible');
+            if (e.target.id === 'stats') countUp();
+        }
     });
-}, { threshold: 0.1 });
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-in, .stagger, .stats-bar').forEach(el => obs.observe(el));
+
+let counted = false;
+function countUp() {
+    if (counted) return;
+    counted = true;
+    document.querySelectorAll('.stat-num[data-target]').forEach((el, i) => {
+        const raw = el.dataset.target;
+        const num = parseInt(raw);
+        const suffix = raw.replace(/[0-9]/g, '');
+        setTimeout(() => {
+            const t0 = performance.now();
+            (function tick(now) {
+                const p = Math.min((now - t0) / 1000, 1);
+                const e = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(num * e) + suffix;
+                if (p < 1) requestAnimationFrame(tick);
+                else el.textContent = raw;
+            })(t0);
+        }, i * 120);
+    });
+}
 </script>
 
 </body>
