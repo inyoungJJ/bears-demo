@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Knowledge System - BEARS</title>
+<link rel="stylesheet" href="bears-theme.css" />
+<style>
+.page-header { padding: 100px 28px 18px; text-align: center; }
+.page-header h1 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; margin-bottom: 8px; }
+.page-header p { font-size: 14.5px; color: var(--text-dim); max-width: 860px; margin: 0 auto; line-height: 1.65; }
+.kw-wrap { max-width: 1180px; margin: 0 auto; padding: 8px 20px 56px; }
+.kw-section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 28px; margin-top: 18px; }
+.kw-kicker { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 8px; }
+.kw-section h2 { font-size: 19px; font-weight: 800; margin: 0 0 10px; }
+.kw-section p { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin: 0 0 10px; }
+.kw-section b { color: var(--text); }
+.diagram { width: 100%; height: auto; display: block; margin: 14px auto 4px; }
+.kw-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; }
+.kw-card { border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; padding: 20px 22px; }
+.kw-card h3 { font-size: 15px; font-weight: 800; margin: 0 0 8px; display: flex; align-items: center; gap: 8px; }
+.kw-card h3 svg { flex: none; }
+.kw-card .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+.t-blue { background: rgba(122,162,247,0.18); color: #2a6cb6; }
+.t-green { background: rgba(158,206,106,0.22); color: #3f7d20; }
+.t-orange { background: rgba(224,175,104,0.25); color: #a3611a; }
+.t-gray { background: rgba(90,96,112,0.12); color: #444a58; }
+.kw-card p { font-size: 13.5px; line-height: 1.65; color: var(--text-dim); margin: 0; }
+.stats-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+.stat { flex: 1; min-width: 140px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 10px; background: #fff; }
+.stat .n { font-size: 26px; font-weight: 800; color: var(--accent); }
+.stat .l { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.takeaway { border-left: 4px solid var(--accent); background: rgba(42,108,182,0.06); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 18px; margin-top: 14px; }
+.takeaway p { margin: 0 0 6px; color: var(--text); font-size: 13.5px; }
+.graph-cta { display: inline-block; margin-top: 14px; background: var(--accent); color: #fff; font-weight: 700; font-size: 13.5px; padding: 11px 22px; border-radius: 8px; text-decoration: none; }
+.graph-cta:hover { opacity: 0.9; }
+.flow-story { font-size: 13.5px; line-height: 1.75; color: var(--text-dim); background: #fff; border: 1px dashed var(--border); border-radius: var(--radius-sm); padding: 16px 20px; margin-top: 12px; }
+.graph-preview { display: block; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; margin-top: 14px; }
+.graph-preview img { width: 100%; display: block; }
+.fig-cap { font-size: 12px; color: var(--text-dim); padding: 10px 12px; background: var(--bg); border-top: 1px solid var(--border); line-height: 1.5; }
+</style>
+</head>
+<body class="bears-page">
+<nav class="bears-nav">
+    <div class="nav-logos">
+        <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+    </div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="agents.html">Agents & Skills</a>
+        <a href="particles.html">Particles</a>
+        <a href="electrodes.html">Electrodes</a>
+        <a href="simulations.html">Simulations</a>
+        <a href="datadriven.html">Prognostics</a>
+        <a href="knowledge.html" class="active">Knowledge</a>
+        <a href="index.html#team">Team</a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>The Knowledge Flywheel</h1>
+    <p>BEARS never debugs the same problem twice. Every failure, every fix, and every lesson is captured
+    in a structured, agent-maintained knowledge base &mdash; and fed back into the next run automatically.
+    This page explains how that loop works.</p>
+</div>
+
+<div class="kw-wrap">
+
+<div class="kw-section">
+    <div class="kw-kicker">The Loop</div>
+    <h2>Run &rarr; Fail &rarr; Recover &rarr; Record &rarr; Reuse</h2>
+    <svg class="diagram" viewBox="0 0 1000 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Knowledge flywheel loop diagram">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a6cb6"/>
+        </marker>
+      </defs>
+      <g font-family="Inter,Arial,sans-serif">
+        <!-- boxes -->
+        <g>
+          <rect x="20"  y="70" width="160" height="64" rx="14" fill="rgba(42,108,182,0.08)" stroke="#c9d6e8"/>
+          <text x="100" y="97"  text-anchor="middle" font-size="15" font-weight="800" fill="#1c2430">Run</text>
+          <text x="100" y="117" text-anchor="middle" font-size="11.5" fill="#5a6478">autonomous campaigns</text>
+        </g>
+        <g>
+          <rect x="220" y="70" width="160" height="64" rx="14" fill="rgba(214,88,88,0.08)" stroke="#e3c3c3"/>
+          <text x="300" y="97"  text-anchor="middle" font-size="15" font-weight="800" fill="#1c2430">Fail</text>
+          <text x="300" y="117" text-anchor="middle" font-size="11.5" fill="#5a6478">solver / mesh / geometry</text>
+        </g>
+        <g>
+          <rect x="420" y="70" width="160" height="64" rx="14" fill="rgba(224,175,104,0.13)" stroke="#e6d3b3"/>
+          <text x="500" y="97"  text-anchor="middle" font-size="15" font-weight="800" fill="#1c2430">Recover</text>
+          <text x="500" y="117" text-anchor="middle" font-size="11.5" fill="#5a6478">match known recipes first</text>
+        </g>
+        <g>
+          <rect x="620" y="70" width="160" height="64" rx="14" fill="rgba(122,162,247,0.12)" stroke="#c9d6e8"/>
+          <text x="700" y="97"  text-anchor="middle" font-size="15" font-weight="800" fill="#1c2430">Record</text>
+          <text x="700" y="117" text-anchor="middle" font-size="11.5" fill="#5a6478">recipe + wiki + memory</text>
+        </g>
+        <g>
+          <rect x="820" y="70" width="160" height="64" rx="14" fill="rgba(158,206,106,0.14)" stroke="#cfe0bd"/>
+          <text x="900" y="97"  text-anchor="middle" font-size="15" font-weight="800" fill="#1c2430">Reuse</text>
+          <text x="900" y="117" text-anchor="middle" font-size="11.5" fill="#5a6478">every future run</text>
+        </g>
+        <!-- forward arrows -->
+        <line x1="182" y1="102" x2="216" y2="102" stroke="#2a6cb6" stroke-width="2.5" marker-end="url(#arr)"/>
+        <line x1="382" y1="102" x2="416" y2="102" stroke="#2a6cb6" stroke-width="2.5" marker-end="url(#arr)"/>
+        <line x1="582" y1="102" x2="616" y2="102" stroke="#2a6cb6" stroke-width="2.5" marker-end="url(#arr)"/>
+        <line x1="782" y1="102" x2="816" y2="102" stroke="#2a6cb6" stroke-width="2.5" marker-end="url(#arr)"/>
+        <!-- loop-back arrow -->
+        <path d="M 900 138 C 900 205, 100 205, 100 140" fill="none" stroke="#2a6cb6" stroke-width="2.5" stroke-dasharray="7 5" marker-end="url(#arr)"/>
+        <text x="500" y="196" text-anchor="middle" font-size="12.5" font-weight="700" fill="#2a6cb6">knowledge compounds &mdash; the next run starts smarter</text>
+      </g>
+    </svg>
+    <p style="text-align:center">Knowledge is treated as a <b>compounding asset</b>: the wiki is compiled once and
+    becomes context for every following session, instead of being re-derived from scratch each time.</p>
+</div>
+
+<div class="kw-section">
+    <div class="kw-kicker">The Four Stores</div>
+    <h2>Where knowledge lives</h2>
+    <div class="kw-grid">
+        <div class="kw-card">
+            <span class="tag t-orange">Error Recovery Playbooks</span>
+            <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a3611a" stroke-width="2"><path d="M14.7 6.3a5 5 0 0 0-6.6 6.6L3 18l3 3 5.1-5.1a5 5 0 0 0 6.6-6.6L14 13l-3-3 3.7-3.7z"/></svg>
+            Machine-readable fix recipes</h3>
+            <p>Every solved error becomes a structured recipe: an <b>error-signature pattern</b>, the diagnosed
+            <b>root cause</b>, an <b>ordered list of fixes</b>, a source reference, and a verification date.
+            When a new error appears, the agent matches it against this dictionary <b>before any reasoning</b> &mdash;
+            known errors are recovered deterministically at zero cost. Recipes are graded: deterministic auto-fix,
+            LLM-assisted diagnosis, or escalate-to-human.</p>
+        </div>
+        <div class="kw-card">
+            <span class="tag t-blue">Engineering Wiki</span>
+            <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2a6cb6" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15zM4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5"/></svg>
+            Knowhow documents</h3>
+            <p>Every debugging session ends by writing the lesson down: root-cause analysis, exact code locations,
+            verified numbers, and honest limitations. Each document registers in a single index, must
+            <b>cross-link at least one related document</b>, and carries freshness metadata
+            (<b>verified date / status / confidence</b>) so stale knowledge is visible instead of silently trusted.</p>
+        </div>
+        <div class="kw-card">
+            <span class="tag t-green">Agent Memory</span>
+            <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3f7d20" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+            Session-persistent context</h3>
+            <p>Preferences, project state, and hard-won lessons persist across sessions as plain-markdown notes with
+            a human-readable catalog. Memories are <b>point-in-time observations</b>: old ones surface with age
+            warnings and are re-verified against current code before being trusted.</p>
+        </div>
+        <div class="kw-card">
+            <span class="tag t-gray">Health Lint</span>
+            <h3><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#444a58" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+            The wiki lints itself</h3>
+            <p>Six automated checks keep the knowledge base healthy: unregistered documents, broken links,
+            code references pointing at moved or shrunk files, verification dates older than 90 days,
+            disputed claims, and isolated documents with no relations. Problems are surfaced for a human
+            to judge &mdash; the linter never edits content.</p>
+        </div>
+    </div>
+</div>
+
+<div class="kw-section">
+    <div class="kw-kicker">Retrieval</div>
+    <h2>How knowledge is found and used</h2>
+    <svg class="diagram" viewBox="0 0 1000 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Retrieval pipeline and benchmark">
+      <defs>
+        <marker id="arr2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#2a6cb6"/>
+        </marker>
+      </defs>
+      <g font-family="Inter,Arial,sans-serif">
+        <rect x="15" y="75" width="150" height="60" rx="12" fill="rgba(42,108,182,0.08)" stroke="#c9d6e8"/>
+        <text x="90" y="101" text-anchor="middle" font-size="13.5" font-weight="800" fill="#1c2430">Question</text>
+        <text x="90" y="119" text-anchor="middle" font-size="11" fill="#5a6478">Korean / English</text>
+
+        <rect x="205" y="18"  width="185" height="50" rx="10" fill="#fff" stroke="#c9d6e8"/>
+        <text x="297" y="40" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2430">Lexical ranking</text>
+        <text x="297" y="56" text-anchor="middle" font-size="10.5" fill="#5a6478">titles + bodies, term stats</text>
+        <rect x="205" y="80"  width="185" height="50" rx="10" fill="#fff" stroke="#c9d6e8"/>
+        <text x="297" y="102" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2430">Rank fusion</text>
+        <text x="297" y="118" text-anchor="middle" font-size="10.5" fill="#5a6478">merge evidence streams</text>
+        <rect x="205" y="142" width="185" height="50" rx="10" fill="#fff" stroke="#c9d6e8"/>
+        <text x="297" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#1c2430">Link-graph hop</text>
+        <text x="297" y="180" text-anchor="middle" font-size="10.5" fill="#5a6478">pull in related notes</text>
+
+        <rect x="440" y="75" width="160" height="60" rx="12" fill="rgba(122,162,247,0.12)" stroke="#c9d6e8"/>
+        <text x="520" y="101" text-anchor="middle" font-size="13.5" font-weight="800" fill="#1c2430">Top-k notes</text>
+        <text x="520" y="119" text-anchor="middle" font-size="11" fill="#5a6478">&lt; 1 second</text>
+
+        <rect x="650" y="75" width="170" height="60" rx="12" fill="rgba(158,206,106,0.14)" stroke="#cfe0bd"/>
+        <text x="735" y="101" text-anchor="middle" font-size="13.5" font-weight="800" fill="#1c2430">Agent context</text>
+        <text x="735" y="119" text-anchor="middle" font-size="11" fill="#5a6478">only what is relevant</text>
+
+        <line x1="167" y1="105" x2="200" y2="105" stroke="#2a6cb6" stroke-width="2.2" marker-end="url(#arr2)"/>
+        <line x1="392" y1="43"  x2="435" y2="95"  stroke="#2a6cb6" stroke-width="2.2" marker-end="url(#arr2)"/>
+        <line x1="392" y1="105" x2="435" y2="105" stroke="#2a6cb6" stroke-width="2.2" marker-end="url(#arr2)"/>
+        <line x1="392" y1="167" x2="435" y2="115" stroke="#2a6cb6" stroke-width="2.2" marker-end="url(#arr2)"/>
+        <line x1="602" y1="105" x2="645" y2="105" stroke="#2a6cb6" stroke-width="2.2" marker-end="url(#arr2)"/>
+
+        <!-- benchmark mini chart -->
+        <text x="905" y="30" text-anchor="middle" font-size="12" font-weight="800" fill="#1c2430">recall@10</text>
+        <rect x="858" y="121" width="38" height="62"  rx="4" fill="#c3cbd9"/>
+        <rect x="912" y="53"  width="38" height="130" rx="4" fill="#2a6cb6"/>
+        <text x="877" y="113" text-anchor="middle" font-size="11.5" font-weight="700" fill="#5a6478">0.62</text>
+        <text x="931" y="45"  text-anchor="middle" font-size="11.5" font-weight="700" fill="#2a6cb6">0.90</text>
+        <text x="877" y="200" text-anchor="middle" font-size="10.5" fill="#5a6478">plain grep</text>
+        <text x="931" y="200" text-anchor="middle" font-size="10.5" fill="#5a6478">hybrid</text>
+      </g>
+    </svg>
+    <p>A <b>hybrid search engine</b> retrieves the right note across all stores in under a second. Quality is
+    measured, not assumed: a <b>golden regression set</b> of real questions scores every change, and
+    <b>every search miss becomes a new test case</b> &mdash; the benchmark grows with use. Heavier machinery
+    (embeddings, vector databases) is deliberately deferred until the evidence demands it.</p>
+    <div class="flow-story">
+        <b>A concrete example.</b> A solver crashes overnight during an autonomous campaign. The runner matches the
+        log against the recovery playbooks and applies the known fix in seconds &mdash; no LLM call, no human.
+        If the error is genuinely new, the agent diagnoses it once, the fix ships as a new recipe plus a wiki
+        entry with verified numbers, and the golden set gains a query that would have found it. The next machine,
+        the next session, and the next teammate never meet that bug unarmed again.
+    </div>
+</div>
+
+<div class="kw-section">
+    <div class="kw-kicker">The Living Graph</div>
+    <h2>Watch the knowledge grow</h2>
+    <p>The whole system is visualized as a living 3D graph: engineering knowhow, agent memories, and recovery
+    recipes, wired together by their cross-references and provenance. Node titles stay private &mdash; the public
+    view shows <b>topology only</b>, refreshed as the wiki grows.</p>
+    <a class="graph-preview" href="wiki_graph.html">
+        <img src="graph_preview.png" alt="BEARS knowledge graph preview - anonymized topology">
+        <div class="fig-cap">Live snapshot of the knowledge graph. Blue = engineering knowhow, green = agent memory,
+        orange = recovery recipes. Click to explore in 3D (drag to rotate, scroll to zoom).</div>
+    </a>
+    <div class="stats-row">
+        <div class="stat"><div class="n">218</div><div class="l">knowledge nodes</div></div>
+        <div class="stat"><div class="n">440</div><div class="l">cross-links</div></div>
+        <div class="stat"><div class="n">42</div><div class="l">recovery recipes</div></div>
+        <div class="stat"><div class="n">0.90</div><div class="l">retrieval recall@10</div></div>
+    </div>
+    <a class="graph-cta" href="wiki_graph.html">Explore the 3D Knowledge Graph &rarr;</a>
+</div>
+
+<div class="kw-section">
+    <div class="kw-kicker">Principles</div>
+    <h2>Rules the system lives by</h2>
+    <div class="takeaway">
+        <p><b>1. Markdown is the source of truth.</b> Search indexes and graphs are disposable caches, rebuilt in milliseconds.</p>
+        <p><b>2. Evidence before infrastructure.</b> New machinery is adopted only when a measured benchmark says it helps.</p>
+        <p><b>3. Every failure is an asset.</b> An error that cost hours once must never cost hours again.</p>
+        <p><b>4. Knowledge decays.</b> Documents carry verification dates; better retrieval of stale facts is worse than no retrieval &mdash; freshness hygiene comes first.</p>
+    </div>
+</div>
+
+</div>
+</body>
+</html>

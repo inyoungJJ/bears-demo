@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Particle Library - BEARS</title>
+<link rel="stylesheet" href="bears-theme.css" />
+<style>
+/* Page layout */
+.page-header {
+    padding: 100px 28px 24px;
+    text-align: center;
+}
+.page-header h1 {
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+.page-header p {
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 800px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+.page-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr 420px;
+    gap: 16px;
+    padding: 0 16px 32px;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+.sidebar {
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 96px);
+    overflow-y: auto;
+}
+.sidebar-panel {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+}
+.center-panel {
+    min-height: calc(100vh - 96px);
+}
+.panel-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin: 0 0 12px;
+}
+/* KPI grid */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 18px;
+}
+/* Overview images */
+.overview-img {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+}
+/* Cluster chip list */
+.cluster-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+/* Card grid */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+}
+.img-card .badges {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+/* Detail extras */
+.detail-comp {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    margin: 10px 0 14px;
+}
+.detail-cluster-info {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+}
+.detail-links {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+}
+/* Responsive */
+@media (max-width: 1400px) {
+    .page-grid {
+        grid-template-columns: 280px 1fr;
+    }
+    .sidebar.right-sidebar {
+        grid-column: 1 / -1;
+        position: static;
+        height: auto;
+    }
+}
+@media (max-width: 900px) {
+    .page-grid {
+        grid-template-columns: 1fr;
+    }
+    .sidebar {
+        position: static;
+        height: auto;
+    }
+}
+</style>
+</head>
+<body class="bears-page">
+
+<nav class="bears-nav">
+    <div class="nav-logos">
+        <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+    </div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="agents.html">Agents & Skills</a>
+        <a href="particles.html" class="active">Particles</a>
+        <a href="electrodes.html">Electrodes</a>
+        <a href="simulations.html">Simulations</a>
+        <a href="datadriven.html">Prognostics</a>
+        <a href="index.html#team">Team</a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>Particle Library</h1>
+    <p>Browse reconstructed particle meshes by cluster, morphology, and mesh quality. Click a particle to view details.</p>
+    <p style="font-size:12.5px;color:var(--text-dim);max-width:760px;margin:6px auto 0;">Default tab shows the <b>NMC811 particle library</b>, rendered in 3D. The Placed Instances tab lists the particle copies placed across generated electrode volumes (use its Electrode filter to browse one volume).</p>
+    <div class="dataset-tabs" style="margin-top: 16px; display: flex; gap: 8px; justify-content: center;">
+        <button class="ds-tab active" data-ds="source" style="padding: 10px 24px; border-radius: 12px; border: 2px solid var(--accent); background: rgba(42,108,182,0.08); color: var(--accent); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;">NMC811 Particle Library</button>
+        <button class="ds-tab" data-ds="instances" style="padding: 10px 24px; border-radius: 12px; border: 2px solid var(--border); background: transparent; color: var(--text-dim); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;">Placed Instances (2,054)</button>
+        <button class="ds-tab" data-ds="graphite" style="padding: 10px 24px; border-radius: 12px; border: 2px solid var(--border); background: transparent; color: var(--text-dim); font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s;">Graphite Templates (11)</button>
+    </div>
+</div>
+
+<div class="page-grid">
+    <!-- Left sidebar -->
+    <aside class="sidebar left-sidebar">
+        <div class="sidebar-panel">
+            <div class="panel-section-title">Overview</div>
+            <div class="kpi-grid" id="kpis"></div>
+            <img class="overview-img" id="clusterPca" alt="cluster pca" />
+            <img class="overview-img" id="featureRanges" alt="feature ranges" />
+            <div class="panel-section-title" style="margin-top:16px">Clusters</div>
+            <div class="cluster-list" id="clusterList"></div>
+        </div>
+    </aside>
+
+    <!-- Center -->
+    <main class="center-panel">
+        <div class="sidebar-panel" style="position:static;height:auto">
+            <div class="panel-section-title">Particle Browser</div>
+            <div class="controls-bar">
+                <input id="searchBox" placeholder="Search by filename, electrode, cluster..." style="min-width:240px;flex:1" />
+                <select id="sortSel">
+                    <option value="cluster_eq_radius">Sort: cluster + size</option>
+                    <option value="faces_desc">Sort: faces (high)</option>
+                    <option value="faces_asc">Sort: faces (low)</option>
+                    <option value="sphericity_desc">Sort: sphericity (high)</option>
+                    <option value="roughness_desc">Sort: rough/concave first</option>
+                </select>
+                <select id="clusterSel"></select>
+                <select id="electrodeSel"></select>
+                <span class="meta" id="resultMeta"></span>
+            </div>
+            <div class="card-grid" id="cardGrid"></div>
+            <div class="empty-state" id="emptyState" style="display:none">No particles match the current filters.</div>
+        </div>
+    </main>
+
+    <!-- Right sidebar -->
+    <aside class="sidebar right-sidebar">
+        <div class="sidebar-panel detail-panel">
+            <div class="panel-section-title">Selected Particle</div>
+            <div id="detailPanel" class="empty-state">Click a particle from the grid to view its details here.</div>
+        </div>
+    </aside>
+</div>
+
+<script src="particles/data/source150_data.js"></script>
+<script src="particles/data/explorer_data.js"></script>
+<script src="particles/data/templates_explorer_data.js"></script>
+<script>
+const TMPL_BASE = 'particles/';
+const TMPL_RENDER_BASE = 'particles/template_renders/';
+const DATASETS = {
+    source: window.NMC811_SOURCE_DATA,
+    instances: window.PLACED_INSTANCES_DATA,
+    graphite: window.TEMPLATE_EXPLORER_DATA
+};
+// Fix graphite template image paths
+if (DATASETS.graphite && DATASETS.graphite.particles) {
+    DATASETS.graphite.particles.forEach(p => {
+        // render_png: assets/templates_before_after_renders/X_after.png -> actual location
+        if (p.render_png && p.render_png.includes('templates_before_after_renders/')) {
+            const fname = p.render_png.split('/').pop();
+            p.render_png = TMPL_RENDER_BASE + fname;
+        } else if (p.render_png && !p.render_png.startsWith('../../')) {
+            p.render_png = TMPL_BASE + p.render_png;
+        }
+        if (p.comparison_png && p.comparison_png.includes('templates_before_after_renders/')) {
+            const fname = p.comparison_png.split('/').pop();
+            p.comparison_png = TMPL_RENDER_BASE + fname;
+        } else if (p.comparison_png && !p.comparison_png.startsWith('../../')) {
+            p.comparison_png = TMPL_BASE + p.comparison_png;
+        }
+        if (p.final_stl && !p.final_stl.startsWith('../../')) p.final_stl = TMPL_BASE + p.final_stl;
+        if (p.raw_stl && !p.raw_stl.startsWith('../../')) p.raw_stl = TMPL_BASE + p.raw_stl;
+    });
+    if (DATASETS.graphite.overview_assets) {
+        Object.keys(DATASETS.graphite.overview_assets).forEach(k => {
+            const v = DATASETS.graphite.overview_assets[k];
+            if (v && !v.startsWith('../../')) DATASETS.graphite.overview_assets[k] = TMPL_BASE + v;
+        });
+    }
+}
+let DATA = DATASETS.source;
+const state = { cluster: 'all', electrode: 'all', q: '', sort: 'cluster_eq_radius', selected: null, dataset: 'source' };
+
+// Tab switching
+document.querySelectorAll('.ds-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.ds-tab').forEach(b => {
+            b.style.border = '2px solid var(--border)';
+            b.style.background = 'transparent';
+            b.style.color = 'var(--text-dim)';
+            b.classList.remove('active');
+        });
+        btn.style.border = '2px solid var(--accent)';
+        btn.style.background = 'rgba(42,108,182,0.08)';
+        btn.style.color = 'var(--accent)';
+        btn.classList.add('active');
+        state.dataset = btn.dataset.ds;
+        DATA = DATASETS[state.dataset];
+        state.cluster = 'all';
+        state.electrode = 'all';
+        state.q = '';
+        state.selected = null;
+        el.searchBox.value = '';
+        buildHeader();
+        render();
+    });
+});
+const el = {
+    kpis: document.getElementById('kpis'),
+    clusterPca: document.getElementById('clusterPca'),
+    featureRanges: document.getElementById('featureRanges'),
+    clusterList: document.getElementById('clusterList'),
+    searchBox: document.getElementById('searchBox'),
+    sortSel: document.getElementById('sortSel'),
+    clusterSel: document.getElementById('clusterSel'),
+    electrodeSel: document.getElementById('electrodeSel'),
+    resultMeta: document.getElementById('resultMeta'),
+    cardGrid: document.getElementById('cardGrid'),
+    emptyState: document.getElementById('emptyState'),
+    detailPanel: document.getElementById('detailPanel')
+};
+
+function fmt(n, d=2) {
+    return Number(n).toLocaleString('ko-KR', { maximumFractionDigits: d, minimumFractionDigits: d });
+}
+function fmtInt(n) {
+    return Number(n).toLocaleString('ko-KR');
+}
+
+function buildHeader() {
+    const faces = DATA.particles.map(p => p.faces).sort((a, b) => a - b);
+    const med = faces[Math.floor(faces.length / 2)];
+    const watertight = DATA.particles.filter(p => p.watertight).length;
+    // Placed instances = copies of source particles across the generated electrode volumes.
+    const isShirley = state.dataset === 'instances';
+    const items = isShirley ? [
+        { v: '150', l: 'Source particles' },
+        { v: fmtInt(DATA.total_particles), l: 'Placed instances (10 electrodes)' },
+        { v: fmtInt(DATA.clusters.length), l: 'Clusters' },
+        { v: `${fmtInt(watertight)}/${fmtInt(DATA.total_particles)}`, l: 'Watertight' }
+    ] : [
+        { v: fmtInt(DATA.total_particles), l: 'Total Particles' },
+        { v: fmtInt(DATA.clusters.length), l: 'Clusters' },
+        { v: fmtInt(med), l: 'Median faces' },
+        { v: `${fmtInt(watertight)}/${fmtInt(DATA.total_particles)}`, l: 'Watertight' }
+    ];
+    el.kpis.innerHTML = items.map(i =>
+        `<div class="stat-card">
+            <div class="stat-value">${i.v}</div>
+            <div class="stat-label">${i.l}</div>
+        </div>`
+    ).join('');
+    const ASSET_BASE = 'particles/';
+    const pca = DATA.overview_assets && DATA.overview_assets.cluster_pca;
+    const feat = DATA.overview_assets && DATA.overview_assets.feature_ranges;
+    el.clusterPca.src = pca ? ((pca.startsWith('../../') || pca.startsWith('particles/')) ? pca : ASSET_BASE + pca) : '';
+    el.featureRanges.src = feat ? ((feat.startsWith('../../') || feat.startsWith('particles/')) ? feat : ASSET_BASE + feat) : '';
+    el.clusterPca.style.display = pca ? '' : 'none';
+    el.featureRanges.style.display = feat ? '' : 'none';
+    buildElectrodeControls();
+}
+
+function buildElectrodeControls() {
+    // Per-electrode filter: view one volume to browse its particles without duplication.
+    const elecs = [...new Set((DATA.particles || []).map(p => p.electrode).filter(Boolean))].sort();
+    if (elecs.length < 2) {
+        el.electrodeSel.style.display = 'none';
+        state.electrode = 'all';
+        return;
+    }
+    el.electrodeSel.style.display = '';
+    el.electrodeSel.innerHTML = `<option value="all">All Electrodes (instances repeat)</option>` +
+        elecs.map(e => `<option value="${e}">${e}</option>`).join('');
+    el.electrodeSel.value = state.electrode;
+}
+
+function buildClusterControls() {
+    el.clusterSel.innerHTML = `<option value="all">All Clusters</option>` +
+        DATA.clusters.map(c =>
+            `<option value="${c.cluster}">C${c.cluster} -- ${c.label_en || c.label_ko || ''} (${c.count})</option>`
+        ).join('');
+    el.clusterSel.value = state.cluster;
+
+    el.clusterList.innerHTML = DATA.clusters.map(c =>
+        `<button class="chip ${String(state.cluster) === String(c.cluster) ? 'active' : ''}" data-cluster="${c.cluster}">
+            <div class="chip-top">
+                <span>C${c.cluster} -- ${c.label_en || c.label_ko || ''}</span>
+                <span>${c.count}</span>
+            </div>
+            <div class="chip-sub">median r ${fmt(c.median_radius)} | sph ${fmt(c.median_sphericity, 3)} | AR ${fmt(c.median_aspect, 3)}</div>
+            <div class="chip-sub">conv ${fmt(c.median_convexity, 3)} | SA/V ${fmt(c.median_surface_area_norm, 3)}</div>
+        </button>`
+    ).join('');
+
+    [...el.clusterList.querySelectorAll('.chip')].forEach(btn => {
+        btn.onclick = () => {
+            state.cluster = btn.dataset.cluster;
+            state.selected = null;
+            render();
+        };
+    });
+}
+
+function filteredParticles() {
+    const q = state.q.trim().toLowerCase();
+    let arr = DATA.particles.filter(p => {
+        const matchCluster = state.cluster === 'all' || String(p.cluster) === String(state.cluster);
+        if (!matchCluster) return false;
+        if (state.electrode !== 'all' && p.electrode !== state.electrode) return false;
+        if (!q) return true;
+        const hay = [p.filename, p.electrode, p.cluster_label_en, p.cluster_label_en, p.feature_note_en || p.feature_note_ko || ''].join(' ').toLowerCase();
+        return hay.includes(q);
+    });
+    if (state.sort === 'faces_desc') arr.sort((a, b) => b.faces - a.faces);
+    else if (state.sort === 'faces_asc') arr.sort((a, b) => a.faces - b.faces);
+    else if (state.sort === 'sphericity_desc') arr.sort((a, b) => b.sphericity - a.sphericity);
+    else if (state.sort === 'roughness_desc') arr.sort((a, b) => (a.convexity_volume_ratio + a.sphericity) - (b.convexity_volume_ratio + b.sphericity));
+    else arr.sort((a, b) => a.cluster - b.cluster || a.eq_radius - b.eq_radius);
+    return arr;
+}
+
+function renderCards() {
+    const arr = filteredParticles();
+    el.resultMeta.textContent = `${arr.length} shown`;
+    if (!arr.length) {
+        el.cardGrid.innerHTML = '';
+        el.emptyState.style.display = 'block';
+        return;
+    }
+    el.emptyState.style.display = 'none';
+    el.cardGrid.innerHTML = arr.map(p =>
+        `<div class="img-card ${state.selected && state.selected.relative_path === p.relative_path ? 'active' : ''}" data-path="${p.relative_path}">
+            <img src="${p.render_png}" loading="lazy" alt="${p.filename}" />
+            <div class="body">
+                <div class="name">${p.filename}</div>
+                <div class="badges">
+                    <span class="badge">C${p.cluster}</span>
+                    <span class="badge">${p.cluster_label_en || p.cluster_label_ko || ''}</span>
+                    ${p.is_representative ? '<span class="badge">Representative</span>' : ''}
+                </div>
+                <div class="mini">
+                    <div>faces <b>${fmtInt(p.faces)}</b></div>
+                    <div>r <b>${fmt(p.eq_radius)}</b></div>
+                    <div>sph <b>${fmt(p.sphericity, 3)}</b></div>
+                    <div>AR <b>${fmt(p.aspect_max_min, 3)}</b></div>
+                </div>
+            </div>
+        </div>`
+    ).join('');
+
+    [...el.cardGrid.querySelectorAll('.img-card')].forEach(card => {
+        card.onclick = () => {
+            state.selected = DATA.particles.find(x => x.relative_path === card.dataset.path);
+            renderCards();
+            renderDetail();
+        };
+    });
+
+    if (!state.selected && arr.length) {
+        state.selected = arr[0];
+        renderCards();
+        renderDetail();
+    }
+}
+
+function clusterInfo(clusterId) {
+    return DATA.clusters.find(c => String(c.cluster) === String(clusterId));
+}
+
+function renderDetail() {
+    const p = state.selected;
+    if (!p) {
+        el.detailPanel.innerHTML = '<div class="empty-state">Select a particle from the grid.</div>';
+        return;
+    }
+    const c = clusterInfo(p.cluster);
+    el.detailPanel.innerHTML =
+        `<h2 class="detail-title">${p.filename}</h2>
+        <div class="detail-sub">${p.electrode}<br/>Cluster C${p.cluster} -- ${p.cluster_label_en || p.cluster_label_ko || ''}</div>
+        <img class="detail-hero" src="${p.render_png}" alt="render" />
+        <div class="detail-note">
+            ${p.is_representative ? 'Representative particle of this cluster.' : ''}
+        </div>
+        <table class="metric-table">
+            <tr><td>vertices</td><td>${fmtInt(p.vertices)}</td></tr>
+            <tr><td>faces</td><td>${fmtInt(p.faces)} ${p.faces_raw ? `(raw ${fmtInt(p.faces_raw)} -> ${fmtInt(p.faces_final)}, ${Math.abs(p.face_reduction_pct).toFixed(1)}% ${p.face_reduction_pct >= 0 ? 'reduced' : 'refined'})` : ''}</td></tr>
+            <tr><td>watertight / body_count</td><td>${p.watertight} / ${p.body_count}</td></tr>
+            <tr><td>eq_radius</td><td>${fmt(p.eq_radius)}</td></tr>
+            <tr><td>volume_abs</td><td>${fmt(p.volume_abs)}</td></tr>
+            <tr><td>area</td><td>${fmt(p.area)}</td></tr>
+            <tr><td>sphericity</td><td>${fmt(p.sphericity, 4)}</td></tr>
+            <tr><td>aspect_max_min</td><td>${fmt(p.aspect_max_min, 4)}</td></tr>
+            <tr><td>aspect_mid_min</td><td>${fmt(p.aspect_mid_min, 4)}</td></tr>
+            <tr><td>convexity</td><td>${fmt(p.convexity_volume_ratio, 4)}</td></tr>
+            <tr><td>surface_area_norm</td><td>${fmt(p.surface_area_norm, 4)}</td></tr>
+            <tr><td>extent xyz</td><td>${fmt(p.extent_x, 2)} x ${fmt(p.extent_y, 2)} x ${fmt(p.extent_z, 2)}</td></tr>
+        </table>
+        ${p.comparison_png ? '<img class="detail-comp" src="' + p.comparison_png + '" alt="raw vs final comparison" />' : ''}
+        <div class="detail-cluster-info">Cluster median: r ${fmt(c.median_radius)}, sph ${fmt(c.median_sphericity, 3)}, AR ${fmt(c.median_aspect, 3)}, convexity ${fmt(c.median_convexity, 3)}</div>
+        <div class="detail-links">
+            <a class="btn btn-primary" href="${p.final_stl}" target="_blank">Final STL</a>
+            <a class="btn btn-secondary" href="${p.raw_stl}" target="_blank">Raw STL</a>
+            <a class="btn btn-secondary" href="${p.render_png}" target="_blank">Render</a>
+            ${p.comparison_png ? '<a class="btn btn-secondary" href="' + p.comparison_png + '" target="_blank">Comparison</a>' : ''}
+        </div>`;
+}
+
+function render() {
+    buildClusterControls();
+    renderCards();
+}
+
+el.searchBox.addEventListener('input', e => {
+    state.q = e.target.value;
+    state.selected = null;
+    render();
+});
+el.sortSel.addEventListener('change', e => {
+    state.sort = e.target.value;
+    state.selected = null;
+    render();
+});
+el.clusterSel.addEventListener('change', e => {
+    state.cluster = e.target.value;
+    state.selected = null;
+    render();
+});
+el.electrodeSel.addEventListener('change', e => {
+    state.electrode = e.target.value;
+    state.selected = null;
+    render();
+});
+
+buildHeader();
+render();
+</script>
+</body>
+</html>

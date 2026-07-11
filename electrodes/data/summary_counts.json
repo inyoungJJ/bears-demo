@@ -1,0 +1,32 @@
+[
+  {
+    "dataset": "graphite_binary",
+    "total": 18,
+    "pass": 17,
+    "fail": 1
+  },
+  {
+    "dataset": "graphite_gradient",
+    "total": 6,
+    "pass": 6,
+    "fail": 0
+  },
+  {
+    "dataset": "graphite_single",
+    "total": 66,
+    "pass": 52,
+    "fail": 14
+  },
+  {
+    "dataset": "nmc_mixed",
+    "total": 12,
+    "pass": 12,
+    "fail": 0
+  },
+  {
+    "dataset": "nmc_single",
+    "total": 10,
+    "pass": 6,
+    "fail": 4
+  }
+]

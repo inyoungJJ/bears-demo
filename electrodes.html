@@ -1,0 +1,1376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BEARS - Electrode Gallery</title>
+  <link rel="stylesheet" href="bears-theme.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "electrodes/vendor/three.module.js"
+    }
+  }
+  </script>
+  <style>
+    /* Page layout */
+    .page-header {
+      padding: 100px 20px 32px;
+      text-align: center;
+    }
+    .page-header h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-dim);
+      max-width: 660px;
+      margin: 0 auto;
+      line-height: 1.7;
+    }
+
+    /* Summary stat row */
+    .summary-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+    }
+
+    /* Page grid */
+    .page-grid {
+      display: grid;
+      grid-template-columns: 1fr 440px;
+      gap: 16px;
+      padding: 16px 0 40px;
+    }
+    .main-col { min-width: 0; }
+    .detail-sidebar {
+      position: sticky;
+      top: 80px;
+      height: calc(100vh - 96px);
+      overflow-y: auto;
+    }
+    .detail-sidebar::-webkit-scrollbar { width: 5px; }
+    .detail-sidebar::-webkit-scrollbar-thumb {
+      background: rgba(0,0,0,0.12); border-radius: 3px;
+    }
+
+    /* Controls panel */
+    .filter-panel {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .filter-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: minmax(200px, 2fr) repeat(4, minmax(110px, 1fr));
+      align-items: end;
+    }
+    .filter-row-secondary {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(140px, 200px)) 1fr;
+      align-items: end;
+      margin-top: 10px;
+    }
+    .filter-group { display: grid; gap: 4px; }
+    .filter-group span {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .filter-group input,
+    .filter-group select {
+      padding: 9px 12px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-family: inherit;
+      font-size: 13px;
+      color: var(--text);
+      width: 100%;
+      transition: var(--transition);
+    }
+    .filter-group input:focus,
+    .filter-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(42,108,182,0.1);
+    }
+    .result-count {
+      align-self: center;
+      justify-self: end;
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    /* Scatter section */
+    .scatter-section {
+      margin-bottom: 16px;
+    }
+    .scatter-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+    .scatter-head h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .scatter-head p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin: 2px 0 0;
+    }
+    #scatter {
+      width: 100%;
+      height: 440px;
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: linear-gradient(180deg, #fdfefe 0%, var(--bg-page) 100%);
+    }
+
+    /* Card grid */
+    .cards-section {
+      margin-bottom: 16px;
+    }
+    .cards-head {
+      margin-bottom: 12px;
+    }
+    .cards-head h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+    .cards-head p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin: 2px 0 0;
+    }
+    .card-grid {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    }
+
+    /* Electrode img-card overrides */
+    .electrode-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .electrode-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+      border-color: rgba(42,108,182,0.2);
+    }
+    .electrode-card.active {
+      border-color: var(--accent);
+      box-shadow: 0 8px 24px rgba(42,108,182,0.12);
+    }
+    .electrode-card img.card-thumb {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      display: block;
+      background: var(--bg-page);
+      border-bottom: 1px solid var(--border);
+    }
+    .electrode-card .card-body {
+      padding: 12px 14px 14px;
+    }
+    .electrode-card .card-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 4px;
+      line-height: 1.3;
+    }
+    .electrode-card .card-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin: 0 0 8px;
+    }
+    .electrode-card .card-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+    .card-metrics-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
+      font-size: 12px;
+      margin-top: 8px;
+    }
+    .card-metric-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      border-bottom: 1px dashed var(--border);
+    }
+    .card-metric-row .label { color: var(--text-dim); font-size: 11px; }
+    .card-metric-row .val { font-weight: 600; font-size: 11px; }
+    .fail-inline {
+      margin-top: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-xs);
+      background: rgba(220,53,69,0.06);
+      border: 1px solid rgba(220,53,69,0.12);
+      color: #dc3545;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    /* Detail panel */
+    .detail-empty {
+      min-height: 240px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 13px;
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-page);
+    }
+    .detail-head-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .detail-kicker {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .detail-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+    .detail-tags {
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    /* Media tabs */
+    .media-tab-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .media-tab {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-dim);
+      transition: var(--transition);
+    }
+    .media-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* Image viewer */
+    .image-frame {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg);
+      min-height: 260px;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .image-frame img {
+      width: 100%;
+      height: 300px;
+      object-fit: contain;
+    }
+    .thumb-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .thumb-btn {
+      width: 80px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      overflow: hidden;
+      padding: 0;
+      background: var(--bg);
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .thumb-btn:hover {
+      border-color: rgba(42,108,182,0.3);
+    }
+    .thumb-btn img {
+      width: 100%;
+      height: 60px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* STL viewer host */
+    .viewer-host {
+      height: 340px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .viewer-host canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    .viewer-note {
+      margin: 6px 0 0;
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    /* Metric grid */
+    .detail-metric-grid {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+    }
+    .detail-metric-card {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      background: var(--bg-page);
+    }
+    .detail-metric-card .label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 500;
+    }
+    .detail-metric-card .value {
+      margin-top: 4px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    /* Detail blocks */
+    .detail-block {
+      margin-top: 16px;
+    }
+    .detail-block h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    /* Source path */
+    .source-path-code {
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding: 10px 12px;
+      background: var(--bg-page);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      font-size: 11px;
+      font-family: 'SF Mono', 'Consolas', monospace;
+      color: var(--text);
+    }
+
+    /* QC fail box */
+    .fail-box {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border: 1px solid rgba(220,53,69,0.15);
+      border-radius: var(--radius-sm);
+      background: rgba(220,53,69,0.04);
+    }
+    .fail-box h3 {
+      margin: 0 0 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #dc3545;
+    }
+    .fail-box p {
+      margin: 0;
+      color: #dc3545;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Ghost button */
+    .ghost-btn {
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: var(--radius-xs);
+      padding: 7px 12px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+    .ghost-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 1100px) {
+      .page-grid {
+        grid-template-columns: 1fr;
+      }
+      .detail-sidebar {
+        position: static;
+        height: auto;
+      }
+    }
+    @media (max-width: 860px) {
+      .filter-row {
+        grid-template-columns: 1fr;
+      }
+      .filter-row-secondary {
+        grid-template-columns: 1fr;
+      }
+      .card-grid {
+        grid-template-columns: 1fr;
+      }
+      .detail-metric-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="bears-page">
+
+  <!-- Nav -->
+  <nav class="bears-nav">
+    <div class="nav-logos">
+      <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+      <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+    </div>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="agents.html">Agents & Skills</a>
+      <a href="particles.html">Particles</a>
+      <a href="electrodes.html" class="active">Electrodes</a>
+      <a href="simulations.html">Simulations</a>
+      <a href="datadriven.html">Prognostics</a>
+      <a href="index.html#team">Team</a>
+    </div>
+  </nav>
+
+  <!-- Page header -->
+  <div class="page-header">
+    <p class="section-label">BEARS Workspace Review</p>
+    <h1>Electrode Gallery</h1>
+    <p>
+      Browse all generated electrode cases in one place. Explore structure metrics via scatter plot,
+      select a case to view images, STL, analysis JSON, and source paths.
+    </p>
+    <div id="summary" class="summary-row"></div>
+  </div>
+
+  <!-- Main content -->
+  <div class="bears-wrap">
+    <div class="page-grid">
+
+      <!-- Left: main column -->
+      <div class="main-col">
+
+        <!-- Filter controls -->
+        <div class="filter-panel">
+          <div class="filter-row">
+            <label class="filter-group">
+              <span>Search</span>
+              <input id="search" type="search" placeholder="case_id, shape, dataset, notes ...">
+            </label>
+            <label class="filter-group">
+              <span>Family</span>
+              <select id="familyFilter"><option value="all">All</option></select>
+            </label>
+            <label class="filter-group">
+              <span>Dataset</span>
+              <select id="datasetFilter"><option value="all">All</option></select>
+            </label>
+            <label class="filter-group">
+              <span>Architecture</span>
+              <select id="architectureFilter"><option value="all">All</option></select>
+            </label>
+            <label class="filter-group">
+              <span>QC</span>
+              <select id="qcFilter">
+                <option value="all">All</option>
+                <option value="pass">Pass only</option>
+                <option value="fail">Fail only</option>
+              </select>
+            </label>
+          </div>
+          <div class="filter-row-secondary">
+            <label class="filter-group">
+              <span>X Metric</span>
+              <select id="xMetric"></select>
+            </label>
+            <label class="filter-group">
+              <span>Y Metric</span>
+              <select id="yMetric"></select>
+            </label>
+            <div class="result-count" id="resultCount"></div>
+          </div>
+        </div>
+
+        <!-- Scatter plot -->
+        <div class="scatter-section scatter-wrap">
+          <div class="scatter-head">
+            <div>
+              <h2>Structure Scatter</h2>
+              <p>Click a point to update the detail panel and highlight the card.</p>
+            </div>
+            <div id="legend" class="legend"></div>
+          </div>
+          <svg id="scatter" aria-label="Electrode scatter plot"></svg>
+        </div>
+
+        <!-- Card grid -->
+        <div class="cards-section">
+          <div class="cards-head">
+            <h2>Electrode Cards</h2>
+            <p>Filtered cases displayed below.</p>
+          </div>
+          <div id="cards" class="card-grid"></div>
+        </div>
+      </div>
+
+      <!-- Right: detail sidebar -->
+      <aside class="detail-sidebar">
+        <div class="detail-panel">
+          <div id="emptyState" class="detail-empty">Select a case to view its details.</div>
+          <div id="detailContent" hidden>
+
+            <!-- Header -->
+            <div class="detail-head-row">
+              <div>
+                <p id="detailDataset" class="detail-kicker"></p>
+                <h2 id="detailTitle" class="detail-title"></h2>
+                <div id="detailTags" class="detail-tags"></div>
+              </div>
+              <button id="copySourcePath" class="ghost-btn" type="button">Copy Path</button>
+            </div>
+
+            <!-- Media tabs -->
+            <div class="media-tab-row">
+              <button class="media-tab active" data-tab="image" type="button">Image</button>
+              <button class="media-tab" data-tab="stl" type="button">STL</button>
+            </div>
+
+            <!-- Image panel -->
+            <div id="imageTab" class="tab-panel active">
+              <div class="image-frame">
+                <img id="detailImage" alt="Selected electrode preview">
+              </div>
+              <div id="thumbs" class="thumb-row"></div>
+            </div>
+
+            <!-- STL panel -->
+            <div id="stlTab" class="tab-panel">
+              <div id="viewerHost" class="viewer-host viewer-container"></div>
+              <p class="viewer-note">STL viewer area. No STL loaded yet.</p>
+            </div>
+
+            <!-- Metrics -->
+            <div class="detail-block">
+              <h3>Metrics</h3>
+              <div id="metrics" class="detail-metric-grid"></div>
+            </div>
+
+            <!-- Files -->
+            <div class="detail-block">
+              <h3>Files</h3>
+              <div id="fileLinks" class="file-grid"></div>
+            </div>
+
+            <!-- Source case -->
+            <div class="detail-block">
+              <h3>Source Case</h3>
+              <code id="sourcePath" class="source-path-code"></code>
+            </div>
+
+            <!-- QC notes -->
+            <div id="failBox" class="fail-box" hidden>
+              <h3>QC Notes</h3>
+              <p id="failReason"></p>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'electrodes/vendor/controls/OrbitControls.js';
+    import { STLLoader } from 'electrodes/vendor/loaders/STLLoader.js';
+
+    // ------------------------------------------------------------------
+    // Config
+    // ------------------------------------------------------------------
+    const BASE = 'electrodes/';
+
+    const datasetColors = {
+      graphite_single:   '#7db8ae',
+      graphite_binary:   '#f0b594',
+      graphite_gradient: '#89a7d6',
+      nmc_single:        '#e9a6a6',
+      nmc_mixed:         '#f2d58a',
+    };
+
+    // Pastel versions for scatter
+    const scatterColors = {
+      graphite_single:   '#a8d5cc',
+      graphite_binary:   '#f5d1be',
+      graphite_gradient: '#b0c5e4',
+      nmc_single:        '#f0c4c4',
+      nmc_mixed:         '#f7e4b0',
+    };
+
+    const metricLabels = {
+      exact_mesh_porosity:     'Exact Porosity',
+      voxel_porosity:          'Voxel Porosity',
+      tau_mean:                'Tau Mean',
+      realized_loading_mg_cm2: 'Loading (mg/cm2)',
+      thickness_um:            'Thickness (um)',
+      runtime_sec:             'Runtime (s)',
+      particle_count:          'Particle Count',
+      realized_d10_um:         'D10 (um)',
+      realized_d50_um:         'D50 (um)',
+      realized_d90_um:         'D90 (um)',
+    };
+
+    const metricChoices = [
+      'exact_mesh_porosity',
+      'voxel_porosity',
+      'tau_mean',
+      'realized_loading_mg_cm2',
+      'thickness_um',
+      'runtime_sec',
+    ];
+
+    // ------------------------------------------------------------------
+    // State
+    // ------------------------------------------------------------------
+    const state = {
+      all: [],
+      filtered: [],
+      selectedId: null,
+      xMetric: 'voxel_porosity',
+      yMetric: 'tau_mean',
+      viewer: null,
+    };
+
+    // ------------------------------------------------------------------
+    // DOM refs
+    // ------------------------------------------------------------------
+    const els = {
+      summary:            document.getElementById('summary'),
+      legend:             document.getElementById('legend'),
+      cards:              document.getElementById('cards'),
+      scatter:            document.getElementById('scatter'),
+      resultCount:        document.getElementById('resultCount'),
+      search:             document.getElementById('search'),
+      familyFilter:       document.getElementById('familyFilter'),
+      datasetFilter:      document.getElementById('datasetFilter'),
+      architectureFilter: document.getElementById('architectureFilter'),
+      qcFilter:           document.getElementById('qcFilter'),
+      xMetric:            document.getElementById('xMetric'),
+      yMetric:            document.getElementById('yMetric'),
+      emptyState:         document.getElementById('emptyState'),
+      detailContent:      document.getElementById('detailContent'),
+      detailDataset:      document.getElementById('detailDataset'),
+      detailTitle:        document.getElementById('detailTitle'),
+      detailTags:         document.getElementById('detailTags'),
+      detailImage:        document.getElementById('detailImage'),
+      thumbs:             document.getElementById('thumbs'),
+      metrics:            document.getElementById('metrics'),
+      fileLinks:          document.getElementById('fileLinks'),
+      sourcePath:         document.getElementById('sourcePath'),
+      failBox:            document.getElementById('failBox'),
+      failReason:         document.getElementById('failReason'),
+      viewerHost:         document.getElementById('viewerHost'),
+      copySourcePath:     document.getElementById('copySourcePath'),
+      tabs:               Array.from(document.querySelectorAll('.media-tab')),
+      panels: {
+        image: document.getElementById('imageTab'),
+        stl:   document.getElementById('stlTab'),
+      },
+    };
+
+    // ------------------------------------------------------------------
+    // Helpers
+    // ------------------------------------------------------------------
+    function fmt(value, digits = 3) {
+      if (value === null || value === undefined || Number.isNaN(value)) return '-';
+      if (typeof value === 'number') return value.toFixed(digits);
+      return String(value);
+    }
+
+    function labelFor(key) {
+      return metricLabels[key] || key;
+    }
+
+    function titleCase(text) {
+      return String(text || '').replace(/_/g, ' ');
+    }
+
+    function assetUrl(path) {
+      if (!path) return '';
+      return BASE + path;
+    }
+
+    // ------------------------------------------------------------------
+    // Summary
+    // ------------------------------------------------------------------
+    function renderSummary(summary) {
+      els.summary.innerHTML = '';
+      // Total card first
+      const totals = summary.reduce((acc, r) => {
+        acc.total += r.total; acc.pass += r.pass; acc.fail += r.fail; return acc;
+      }, { total: 0, pass: 0, fail: 0 });
+      const totalCard = document.createElement('div');
+      totalCard.className = 'stat-card';
+      totalCard.innerHTML = `<div class="stat-value">${totals.total}</div><div class="stat-label">Total Electrodes</div>`;
+      els.summary.appendChild(totalCard);
+
+      for (const row of summary) {
+        const card = document.createElement('div');
+        card.className = 'stat-card';
+        card.innerHTML = `
+          <div class="stat-value">${row.pass}/${row.total}</div>
+          <div class="stat-label">${row.dataset}</div>
+        `;
+        els.summary.appendChild(card);
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Legend
+    // ------------------------------------------------------------------
+    function renderLegend() {
+      els.legend.innerHTML = '';
+      Object.entries(datasetColors).forEach(([dataset, color]) => {
+        const item = document.createElement('span');
+        item.className = 'legend-item';
+        item.innerHTML = `<span class="legend-dot" style="background:${color}"></span>${dataset}`;
+        els.legend.appendChild(item);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Filter dropdowns
+    // ------------------------------------------------------------------
+    function populateOptions(select, values) {
+      const current = select.value || 'all';
+      select.innerHTML = '<option value="all">All</option>';
+      values.forEach((value) => {
+        const opt = document.createElement('option');
+        opt.value = value;
+        opt.textContent = value;
+        if (value === current) opt.selected = true;
+        select.appendChild(opt);
+      });
+    }
+
+    function populateMetricOptions() {
+      for (const select of [els.xMetric, els.yMetric]) {
+        select.innerHTML = '';
+        metricChoices.forEach((key) => {
+          const opt = document.createElement('option');
+          opt.value = key;
+          opt.textContent = labelFor(key);
+          select.appendChild(opt);
+        });
+      }
+      els.xMetric.value = state.xMetric;
+      els.yMetric.value = state.yMetric;
+    }
+
+    // ------------------------------------------------------------------
+    // Filtering
+    // ------------------------------------------------------------------
+    function getFiltered() {
+      const q = els.search.value.trim().toLowerCase();
+      const family = els.familyFilter.value;
+      const dataset = els.datasetFilter.value;
+      const architecture = els.architectureFilter.value;
+      const qc = els.qcFilter.value;
+
+      return state.all.filter((row) => {
+        if (family !== 'all' && row.family !== family) return false;
+        if (dataset !== 'all' && row.dataset !== dataset) return false;
+        if (architecture !== 'all' && row.architecture !== architecture) return false;
+        if (qc !== 'all' && row.qc_status !== qc) return false;
+
+        if (!q) return true;
+        const hay = [
+          row.case_id,
+          row.title,
+          row.dataset,
+          row.family,
+          row.material,
+          row.architecture,
+          row.shape_primary,
+          row.shape_secondary,
+          row.psd_label,
+          row.gradient_mode,
+          row.mix_ratio,
+          row.notes,
+          row.source_case_dir,
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .toLowerCase();
+        return hay.includes(q);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Cards
+    // ------------------------------------------------------------------
+    function renderCards(rows) {
+      els.cards.innerHTML = '';
+      for (const row of rows) {
+        const article = document.createElement('article');
+        article.className = 'electrode-card';
+        article.dataset.siteId = row.site_id;
+        if (row.site_id === state.selectedId) article.classList.add('active');
+
+        const tagHtml = [
+          `<span class="tag ${row.qc_status === 'pass' ? 'tag-pass' : 'tag-fail'}">${row.qc_status}</span>`,
+          `<span class="tag tag-blue">${row.dataset}</span>`,
+          row.shape_primary ? `<span class="tag tag-purple">${row.shape_primary}</span>` : '',
+          row.shape_secondary ? `<span class="tag tag-gold">${row.shape_secondary}</span>` : '',
+          row.gradient_mode ? `<span class="tag tag-orange">${row.gradient_mode}</span>` : '',
+        ].filter(Boolean).join('');
+
+        article.innerHTML = `
+          <img class="card-thumb" src="${assetUrl(row.image)}" alt="${row.case_id}">
+          <div class="card-body">
+            <div class="card-title">${row.title || row.case_id}</div>
+            <div class="card-sub">${row.case_id} -- ${row.material || '-'} -- ${titleCase(row.architecture || '-')}</div>
+            <div class="card-tags">${tagHtml}</div>
+            <div class="card-metrics-grid">
+              <div class="card-metric-row"><span class="label">Exact</span><span class="val">${fmt(row.exact_mesh_porosity)}</span></div>
+              <div class="card-metric-row"><span class="label">Voxel</span><span class="val">${fmt(row.voxel_porosity)}</span></div>
+              <div class="card-metric-row"><span class="label">Tortuosity</span><span class="val">${fmt(row.tau_mean)}</span></div>
+              <div class="card-metric-row"><span class="label">Thickness</span><span class="val">${fmt(row.thickness_um)}</span></div>
+              <div class="card-metric-row"><span class="label">Loading</span><span class="val">${fmt(row.realized_loading_mg_cm2)}</span></div>
+            </div>
+            ${row.qc_status !== 'pass' && row.fail_reason ? `<div class="fail-inline">${row.fail_reason}</div>` : ''}
+          </div>
+        `;
+        article.addEventListener('click', () => selectRecord(row.site_id, true));
+        els.cards.appendChild(article);
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Scatter plot (SVG)
+    // ------------------------------------------------------------------
+    function makeSvg(tag) {
+      return document.createElementNS('http://www.w3.org/2000/svg', tag);
+    }
+
+    function renderScatter(rows) {
+      const svg = els.scatter;
+      const width = svg.clientWidth || 900;
+      const height = 440;
+      const pad = { l: 72, r: 24, t: 22, b: 50 };
+      const xKey = state.xMetric;
+      const yKey = state.yMetric;
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+      svg.innerHTML = '';
+
+      const points = rows.filter((row) => typeof row[xKey] === 'number' && typeof row[yKey] === 'number');
+      if (!points.length) {
+        const text = makeSvg('text');
+        text.textContent = 'No numeric data available to display.';
+        text.setAttribute('x', width / 2);
+        text.setAttribute('y', height / 2);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('fill', '#5a6070');
+        text.setAttribute('font-size', '14');
+        text.setAttribute('font-family', 'Inter, sans-serif');
+        svg.appendChild(text);
+        return;
+      }
+
+      const xs = points.map((r) => r[xKey]);
+      const ys = points.map((r) => r[yKey]);
+      const xmin = Math.min(...xs);
+      const xmax = Math.max(...xs);
+      const ymin = Math.min(...ys);
+      const ymax = Math.max(...ys);
+      const xpad = Math.max((xmax - xmin) * 0.08, 0.02);
+      const ypad = Math.max((ymax - ymin) * 0.08, 0.04);
+
+      const scaleX = (v) => pad.l + ((v - (xmin - xpad)) / ((xmax + xpad) - (xmin - xpad))) * (width - pad.l - pad.r);
+      const scaleY = (v) => height - pad.b - ((v - (ymin - ypad)) / ((ymax + ypad) - (ymin - ypad))) * (height - pad.t - pad.b);
+
+      // Grid lines
+      for (let i = 0; i < 5; i++) {
+        const ratio = i / 4;
+        const xv = (xmin - xpad) + (((xmax + xpad) - (xmin - xpad)) * ratio);
+        const x = scaleX(xv);
+        const grid = makeSvg('line');
+        grid.setAttribute('x1', x); grid.setAttribute('x2', x);
+        grid.setAttribute('y1', pad.t); grid.setAttribute('y2', height - pad.b);
+        grid.setAttribute('stroke', 'rgba(0,0,0,0.05)'); grid.setAttribute('stroke-width', '1');
+        svg.appendChild(grid);
+
+        const label = makeSvg('text');
+        label.textContent = xv.toFixed(2);
+        label.setAttribute('x', x); label.setAttribute('y', height - pad.b + 20);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('fill', '#5a6070'); label.setAttribute('font-size', '11');
+        label.setAttribute('font-family', 'Inter, sans-serif');
+        svg.appendChild(label);
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const ratio = i / 4;
+        const yv = (ymin - ypad) + (((ymax + ypad) - (ymin - ypad)) * ratio);
+        const y = scaleY(yv);
+        const grid = makeSvg('line');
+        grid.setAttribute('x1', pad.l); grid.setAttribute('x2', width - pad.r);
+        grid.setAttribute('y1', y); grid.setAttribute('y2', y);
+        grid.setAttribute('stroke', 'rgba(0,0,0,0.05)'); grid.setAttribute('stroke-width', '1');
+        svg.appendChild(grid);
+
+        const label = makeSvg('text');
+        label.textContent = yv.toFixed(2);
+        label.setAttribute('x', pad.l - 8); label.setAttribute('y', y + 4);
+        label.setAttribute('text-anchor', 'end');
+        label.setAttribute('fill', '#5a6070'); label.setAttribute('font-size', '11');
+        label.setAttribute('font-family', 'Inter, sans-serif');
+        svg.appendChild(label);
+      }
+
+      // Axes
+      const xAxis = makeSvg('line');
+      xAxis.setAttribute('x1', pad.l); xAxis.setAttribute('x2', width - pad.r);
+      xAxis.setAttribute('y1', height - pad.b); xAxis.setAttribute('y2', height - pad.b);
+      xAxis.setAttribute('stroke', '#5a6070'); xAxis.setAttribute('stroke-width', '1.2');
+      svg.appendChild(xAxis);
+
+      const yAxis = makeSvg('line');
+      yAxis.setAttribute('x1', pad.l); yAxis.setAttribute('x2', pad.l);
+      yAxis.setAttribute('y1', pad.t); yAxis.setAttribute('y2', height - pad.b);
+      yAxis.setAttribute('stroke', '#5a6070'); yAxis.setAttribute('stroke-width', '1.2');
+      svg.appendChild(yAxis);
+
+      // Axis labels
+      const xLabel = makeSvg('text');
+      xLabel.textContent = labelFor(xKey);
+      xLabel.setAttribute('x', width / 2); xLabel.setAttribute('y', height - 10);
+      xLabel.setAttribute('text-anchor', 'middle');
+      xLabel.setAttribute('fill', '#1a1a2e'); xLabel.setAttribute('font-size', '12');
+      xLabel.setAttribute('font-weight', '600'); xLabel.setAttribute('font-family', 'Inter, sans-serif');
+      svg.appendChild(xLabel);
+
+      const yLabel = makeSvg('text');
+      yLabel.textContent = labelFor(yKey);
+      yLabel.setAttribute('x', 16); yLabel.setAttribute('y', height / 2);
+      yLabel.setAttribute('transform', `rotate(-90 16 ${height / 2})`);
+      yLabel.setAttribute('text-anchor', 'middle');
+      yLabel.setAttribute('fill', '#1a1a2e'); yLabel.setAttribute('font-size', '12');
+      yLabel.setAttribute('font-weight', '600'); yLabel.setAttribute('font-family', 'Inter, sans-serif');
+      svg.appendChild(yLabel);
+
+      // Points
+      points.forEach((row) => {
+        const circle = makeSvg('circle');
+        circle.setAttribute('cx', scaleX(row[xKey]));
+        circle.setAttribute('cy', scaleY(row[yKey]));
+        circle.setAttribute('r', row.qc_status === 'pass' ? '5.5' : '6.2');
+        circle.setAttribute('fill', scatterColors[row.dataset] || '#b0b8c4');
+        circle.setAttribute('fill-opacity', row.qc_status === 'pass' ? '0.9' : '0.25');
+        circle.setAttribute('stroke', row.site_id === state.selectedId ? '#2a6cb6' : '#ffffff');
+        circle.setAttribute('stroke-width', row.site_id === state.selectedId ? '2.5' : '1.2');
+        circle.style.cursor = 'pointer';
+        circle.style.transition = 'stroke 0.2s, stroke-width 0.2s';
+        circle.addEventListener('click', () => selectRecord(row.site_id, true));
+
+        const title = makeSvg('title');
+        title.textContent = `${row.case_id} | ${labelFor(xKey)} ${fmt(row[xKey])} | ${labelFor(yKey)} ${fmt(row[yKey])}`;
+        circle.appendChild(title);
+        svg.appendChild(circle);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Detail panel: metrics
+    // ------------------------------------------------------------------
+    function renderMetricCards(row) {
+      const metrics = [
+        ['exact_mesh_porosity', row.exact_mesh_porosity],
+        ['voxel_porosity', row.voxel_porosity],
+        ['tau_mean', row.tau_mean],
+        ['realized_loading_mg_cm2', row.realized_loading_mg_cm2],
+        ['thickness_um', row.thickness_um],
+        ['particle_count', row.particle_count],
+        ['realized_d10_um', row.realized_d10_um],
+        ['realized_d50_um', row.realized_d50_um],
+        ['realized_d90_um', row.realized_d90_um],
+        ['runtime_sec', row.runtime_sec],
+      ];
+      els.metrics.innerHTML = '';
+      metrics.forEach(([key, value]) => {
+        const card = document.createElement('div');
+        card.className = 'detail-metric-card';
+        card.innerHTML = `<div class="label">${labelFor(key)}</div><div class="value">${fmt(value)}</div>`;
+        els.metrics.appendChild(card);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Detail panel: file links
+    // ------------------------------------------------------------------
+    function renderFileLinks(row) {
+      const items = [
+        ['STL', row.stl_url],
+        ['Electrode JSON', row.electrode_json_url],
+        ['Case Manifest', row.case_manifest_url],
+        ['Tortuosity JSON', row.tau_url],
+        ['QC JSON', row.qc_url],
+        ['Loading JSON', row.loading_url],
+        ['PSD JSON', row.psd_url],
+      ].filter(([, url]) => url);
+
+      els.fileLinks.innerHTML = '';
+      items.forEach(([label, url]) => {
+        const a = document.createElement('a');
+        a.className = 'file-link';
+        a.href = assetUrl(url);
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = label;
+        els.fileLinks.appendChild(a);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // Detail panel: thumbnails
+    // ------------------------------------------------------------------
+    function renderThumbs(row) {
+      const thumbs = [
+        ['Isometric', row.image],
+        ['Top', row.image_top],
+        ['Front', row.image_front],
+        ['Side', row.image_side],
+      ].filter(([, url]) => url);
+
+      els.thumbs.innerHTML = '';
+      thumbs.forEach(([label, url]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'thumb-btn';
+        btn.title = label;
+        btn.innerHTML = `<img src="${assetUrl(url)}" alt="${label}">`;
+        btn.addEventListener('click', () => {
+          els.detailImage.src = assetUrl(url);
+          els.detailImage.alt = `${row.case_id} ${label}`;
+        });
+        els.thumbs.appendChild(btn);
+      });
+    }
+
+    // ------------------------------------------------------------------
+    // 3D STL Viewer (Three.js)
+    // ------------------------------------------------------------------
+    function cleanupViewer() {
+      if (!state.viewer) return;
+      if (state.viewer.animationId) cancelAnimationFrame(state.viewer.animationId);
+      state.viewer.controls.dispose();
+      state.viewer.renderer.dispose();
+      state.viewer.host.innerHTML = '';
+      state.viewer = null;
+    }
+
+    function renderViewer(url) {
+      cleanupViewer();
+      if (!url) return;
+
+      const fullUrl = assetUrl(url);
+      const host = els.viewerHost;
+      const width = host.clientWidth || 440;
+      const height = host.clientHeight || 340;
+
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xf4f6f8);
+
+      const camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 2000);
+      camera.position.set(0, 0, 120);
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setPixelRatio(window.devicePixelRatio || 1);
+      renderer.setSize(width, height);
+      host.innerHTML = '';
+      host.appendChild(renderer.domElement);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+
+      scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+      const dirA = new THREE.DirectionalLight(0xffffff, 1.2);
+      dirA.position.set(40, 40, 80);
+      scene.add(dirA);
+      const dirB = new THREE.DirectionalLight(0xdbe6f1, 0.8);
+      dirB.position.set(-30, -20, 50);
+      scene.add(dirB);
+
+      const loader = new STLLoader();
+      loader.load(fullUrl, (geometry) => {
+        geometry.computeVertexNormals();
+        geometry.center();
+        const material = new THREE.MeshStandardMaterial({
+          color: 0x6e8fa7,
+          metalness: 0.08,
+          roughness: 0.72,
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        geometry.computeBoundingBox();
+        const box = geometry.boundingBox;
+        const size = new THREE.Vector3();
+        box.getSize(size);
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const distance = maxDim * 1.9;
+        camera.position.set(distance * 0.75, distance * 0.5, distance);
+        controls.target.set(0, 0, 0);
+        controls.update();
+      });
+
+      let animationId = null;
+      const tick = () => {
+        controls.update();
+        renderer.render(scene, camera);
+        animationId = requestAnimationFrame(tick);
+      };
+      tick();
+
+      state.viewer = { host, renderer, scene, camera, controls, animationId };
+    }
+
+    // ------------------------------------------------------------------
+    // Detail panel: full render
+    // ------------------------------------------------------------------
+    function renderDetails(row) {
+      if (!row) {
+        els.emptyState.hidden = false;
+        els.detailContent.hidden = true;
+        cleanupViewer();
+        return;
+      }
+
+      els.emptyState.hidden = true;
+      els.detailContent.hidden = false;
+      els.detailDataset.textContent = `${row.family} / ${row.dataset}`;
+      els.detailTitle.textContent = row.title || row.case_id;
+
+      // Tags
+      els.detailTags.innerHTML = '';
+      [
+        row.qc_status,
+        row.architecture,
+        row.shape_primary,
+        row.shape_secondary,
+        row.gradient_mode,
+        row.psd_label,
+      ]
+        .filter(Boolean)
+        .forEach((item) => {
+          const span = document.createElement('span');
+          let cls = 'tag';
+          if (item === 'pass') cls += ' tag-pass';
+          else if (item === 'fail') cls += ' tag-fail';
+          else cls += ' tag-blue';
+          span.className = cls;
+          span.textContent = item;
+          els.detailTags.appendChild(span);
+        });
+
+      // Image
+      els.detailImage.src = assetUrl(row.image);
+      els.detailImage.alt = row.case_id;
+      renderThumbs(row);
+      renderMetricCards(row);
+      renderFileLinks(row);
+      els.sourcePath.textContent = row.source_case_dir || '';
+
+      // QC
+      if (row.qc_status !== 'pass' && row.fail_reason) {
+        els.failBox.hidden = false;
+        els.failReason.textContent = row.fail_reason;
+      } else {
+        els.failBox.hidden = true;
+        els.failReason.textContent = '';
+      }
+
+      // STL viewer if tab active
+      if (document.querySelector('.media-tab.active')?.dataset.tab === 'stl') {
+        renderViewer(row.stl_url);
+      } else {
+        cleanupViewer();
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Selection
+    // ------------------------------------------------------------------
+    function selectRecord(siteId, scrollCard = false) {
+      state.selectedId = siteId;
+      const row = state.all.find((item) => item.site_id === siteId) || state.filtered[0] || null;
+      renderCards(state.filtered);
+      renderScatter(state.filtered);
+      renderDetails(row);
+
+      if (scrollCard) {
+        const card = document.querySelector(`.electrode-card[data-site-id="${siteId}"]`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+
+    // ------------------------------------------------------------------
+    // Render all
+    // ------------------------------------------------------------------
+    function renderAll() {
+      state.filtered = getFiltered();
+      els.resultCount.textContent = `${state.filtered.length} cases shown`;
+      if (!state.filtered.find((row) => row.site_id === state.selectedId)) {
+        state.selectedId = state.filtered[0]?.site_id || null;
+      }
+      renderCards(state.filtered);
+      renderScatter(state.filtered);
+      renderDetails(state.all.find((row) => row.site_id === state.selectedId));
+    }
+
+    // ------------------------------------------------------------------
+    // Events
+    // ------------------------------------------------------------------
+    function bindEvents() {
+      [els.search, els.familyFilter, els.datasetFilter, els.architectureFilter, els.qcFilter].forEach((el) => {
+        el.addEventListener('input', renderAll);
+        el.addEventListener('change', renderAll);
+      });
+
+      els.xMetric.addEventListener('change', () => {
+        state.xMetric = els.xMetric.value;
+        renderAll();
+      });
+      els.yMetric.addEventListener('change', () => {
+        state.yMetric = els.yMetric.value;
+        renderAll();
+      });
+
+      els.copySourcePath.addEventListener('click', async () => {
+        const row = state.all.find((item) => item.site_id === state.selectedId);
+        if (!row?.source_case_dir) return;
+        try {
+          await navigator.clipboard.writeText(row.source_case_dir);
+          els.copySourcePath.textContent = 'Copied';
+          window.setTimeout(() => { els.copySourcePath.textContent = 'Copy Path'; }, 1200);
+        } catch {
+          els.copySourcePath.textContent = 'Copy failed';
+          window.setTimeout(() => { els.copySourcePath.textContent = 'Copy Path'; }, 1200);
+        }
+      });
+
+      els.tabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          els.tabs.forEach((node) => node.classList.remove('active'));
+          Object.values(els.panels).forEach((panel) => panel.classList.remove('active'));
+          tab.classList.add('active');
+          els.panels[tab.dataset.tab].classList.add('active');
+          const row = state.all.find((item) => item.site_id === state.selectedId);
+          if (tab.dataset.tab === 'stl') {
+            renderViewer(row?.stl_url);
+          } else {
+            cleanupViewer();
+          }
+        });
+      });
+
+      window.addEventListener('beforeunload', cleanupViewer);
+    }
+
+    // ------------------------------------------------------------------
+    // Init
+    // ------------------------------------------------------------------
+    async function init() {
+      const [summary, rows] = await Promise.all([
+        fetch(BASE + 'data/summary_counts.json').then((r) => r.json()),
+        fetch(BASE + 'data/electrodes.json').then((r) => r.json()),
+      ]);
+
+      state.all = rows.map((row) => {
+        const normalized = { ...row };
+        Object.keys(normalized).forEach((key) => {
+          if (typeof normalized[key] === 'string' && /^-?\d+(\.\d+)?$/.test(normalized[key])) {
+            const numeric = Number(normalized[key]);
+            if (!Number.isNaN(numeric)) normalized[key] = numeric;
+          }
+        });
+        return normalized;
+      });
+
+      populateOptions(els.familyFilter, [...new Set(state.all.map((r) => r.family).filter(Boolean))].sort());
+      populateOptions(els.datasetFilter, [...new Set(state.all.map((r) => r.dataset).filter(Boolean))].sort());
+      populateOptions(els.architectureFilter, [...new Set(state.all.map((r) => r.architecture).filter(Boolean))].sort());
+      populateMetricOptions();
+      renderSummary(summary);
+      renderLegend();
+      bindEvents();
+      renderAll();
+    }
+
+    init();
+  </script>
+</body>
+</html>

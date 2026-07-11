@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEARS - Simulation Results</title>
+    <link rel="stylesheet" href="bears-theme.css">
+    <style>
+        /* Page header */
+        .page-header {
+            padding: 100px 20px 48px;
+            text-align: center;
+        }
+        .page-header h1 {
+            font-size: clamp(28px, 5vw, 42px);
+            font-weight: 800;
+            margin-bottom: 12px;
+        }
+        .page-header p {
+            font-size: 15px;
+            color: var(--text-dim);
+            max-width: 680px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Stats row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            max-width: 700px;
+            margin: 0 auto 40px;
+        }
+
+        /* Filter bar */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .filter-bar label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-group {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            padding: 6px 14px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+            background: var(--bg);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+        .filter-btn:hover {
+            border-color: rgba(42,108,182,0.3);
+            color: var(--accent);
+        }
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+        .filter-separator {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 8px;
+        }
+
+        /* Case cards grid */
+        .case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .case-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .case-card.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(42,108,182,0.2), var(--shadow-md);
+        }
+        .case-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .case-card-header h3 {
+            font-size: 15px;
+            font-weight: 700;
+        }
+        .case-tags {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        .case-card p {
+            font-size: 12px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+        .case-crates {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        .crate-chip {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            background: rgba(42,108,182,0.06);
+            color: var(--accent);
+        }
+        .case-thumb {
+            width: 100%;
+            height: 160px;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: var(--bg-page);
+            margin-top: 10px;
+        }
+        .no-data-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dim);
+            font-style: italic;
+        }
+
+        /* Detail section */
+        .detail-section {
+            display: none;
+            margin-bottom: 48px;
+        }
+        .detail-section.visible {
+            display: block;
+        }
+        .detail-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+        .detail-header h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+        .detail-close {
+            padding: 6px 14px;
+            border-radius: var(--radius-xs);
+            border: 1px solid var(--border);
+            background: var(--bg);
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            transition: var(--transition);
+        }
+        .detail-close:hover {
+            border-color: rgba(220,53,69,0.3);
+            color: #dc3545;
+        }
+        .detail-desc {
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-bottom: 20px;
+        }
+
+        /* Summary images */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .summary-img-wrap {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            padding: 12px;
+        }
+        .summary-img-wrap img {
+            width: 100%;
+            object-fit: contain;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+        .summary-img-wrap .img-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* SOC grid */
+        .soc-section h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .soc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .soc-img-wrap {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            padding: 8px;
+        }
+        .soc-img-wrap img {
+            width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+        .soc-img-wrap .soc-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-dim);
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        /* C-rate results */
+        .crate-results h3 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .crate-results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        .crate-result-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            padding: 12px;
+        }
+        .crate-result-card .crate-label {
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .crate-result-card img {
+            width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #fff;
+        }
+
+        /* Section containers */
+        .section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+
+        /* Visible count */
+        .visible-count {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-bottom: 12px;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 48px 20px;
+            border-top: 1px solid var(--border);
+            font-size: 13px;
+            color: #999;
+        }
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .summary-grid { grid-template-columns: 1fr; }
+            .soc-grid { grid-template-columns: repeat(2, 1fr); }
+            .case-grid { grid-template-columns: 1fr; }
+            .filter-separator { display: none; }
+        }
+    </style>
+</head>
+<body class="bears-page">
+
+<!-- Nav -->
+<nav class="bears-nav">
+    <div class="nav-logos">
+        <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+    </div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="agents.html">Agents &amp; Skills</a>
+        <a href="particles.html">Particles</a>
+        <a href="electrodes.html">Electrodes</a>
+        <a href="simulations.html" class="active">Simulations</a>
+        <a href="datadriven.html">Prognostics</a>
+        <a href="index.html#team">Team</a>
+    </div>
+</nav>
+
+<!-- Header -->
+<div class="page-header">
+    <h1>Simulation Results</h1>
+    <p>COMSOL half-cell electrochemical simulation results across multiple electrode architectures, materials, and C-rates.</p>
+</div>
+
+<!-- Stats -->
+<div class="section" style="padding-bottom: 24px;">
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-value">13</div>
+            <div class="stat-label">Total Cases</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">2</div>
+            <div class="stat-label">Materials</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">4</div>
+            <div class="stat-label">Architectures</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value">4</div>
+            <div class="stat-label">C-Rates (max)</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="section" style="padding-bottom: 0;">
+    <div class="filter-bar">
+        <label>Material</label>
+        <div class="filter-group" id="material-filters">
+            <button class="filter-btn active" data-filter="material" data-value="all">All</button>
+            <button class="filter-btn" data-filter="material" data-value="Graphite">Graphite</button>
+            <button class="filter-btn" data-filter="material" data-value="NMC811">NMC811</button>
+        </div>
+        <div class="filter-separator"></div>
+        <label>Architecture</label>
+        <div class="filter-group" id="arch-filters">
+            <button class="filter-btn active" data-filter="architecture" data-value="all">All</button>
+            <button class="filter-btn" data-filter="architecture" data-value="Single">Single</button>
+            <button class="filter-btn" data-filter="architecture" data-value="Binary">Binary</button>
+            <button class="filter-btn" data-filter="architecture" data-value="Gradient">Gradient</button>
+            <button class="filter-btn" data-filter="architecture" data-value="Sphere Reference">Sphere Ref</button>
+        </div>
+    </div>
+    <div class="visible-count" id="visible-count"></div>
+</div>
+
+<!-- Case Cards -->
+<div class="section" id="cases-section">
+    <div class="case-grid" id="case-grid"></div>
+</div>
+
+<!-- Detail Section -->
+<div class="section">
+    <div class="detail-section" id="detail-section">
+        <div class="detail-panel">
+            <div class="detail-header">
+                <h2 id="detail-title"></h2>
+                <button class="detail-close" id="detail-close">Close</button>
+            </div>
+            <div class="detail-desc" id="detail-desc"></div>
+            <div class="case-tags" id="detail-tags"></div>
+
+            <!-- Summary plots -->
+            <div style="margin-top: 20px;">
+                <div class="section-label" style="margin-bottom: 12px;">Summary Plots</div>
+                <div class="summary-grid" id="summary-grid"></div>
+            </div>
+
+            <!-- SOC contours -->
+            <div class="soc-section" id="soc-section" style="margin-top: 24px; display: none;">
+                <div class="section-label" style="margin-bottom: 12px;">SOC Contour Plots</div>
+                <div class="soc-grid" id="soc-grid"></div>
+            </div>
+
+            <!-- Per C-rate results -->
+            <div class="crate-results" id="crate-results" style="margin-top: 24px; display: none;">
+                <div class="section-label" style="margin-bottom: 12px;">Per C-Rate Results</div>
+                <div class="crate-results-grid" id="crate-results-grid"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer>
+    <p style="color: var(--text-dim);"><strong>BEARS</strong> -- Battery Electrode Agent Research System</p>
+    <p style="margin-top: 8px;">
+        <a href="https://github.com/inyoungJJ/BEARS" target="_blank">GitHub</a>
+        &nbsp;&middot;&nbsp;
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank">MEMLab</a>
+        &nbsp;&middot;&nbsp; Chung-Ang University
+    </p>
+</footer>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const CASES = [
+    // SINGLE - Graphite
+    {
+        id: 'HC01', name: 'HC01 - Single Dense',
+        material: 'Graphite', architecture: 'Single',
+        description: 'Dense single-template electrode (5_opti, narrow PSD)',
+        basePath: 'simulations/Single/HC01/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_HC01_0p5C_custom.png', 'soc_HC01_0p5C_end.png', 'soc_HC01_0p5C_mid.png',
+            'soc_HC01_1C_custom.png', 'soc_HC01_1C_end.png',
+            'soc_HC01_2C_custom.png', 'soc_HC01_2C_end.png',
+            'soc_HC01_3C_custom.png', 'soc_HC01_3C_end.png'
+        ]
+    },
+    {
+        id: 'HC02', name: 'HC02 - Single Loose',
+        material: 'Graphite', architecture: 'Single',
+        description: 'Loose single-template electrode (control)',
+        basePath: 'simulations/Single/HC02_control/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: false,
+        socFiles: []
+    },
+    // BINARY - Graphite
+    {
+        id: 'HC05', name: 'HC05 - Binary Dense',
+        material: 'Graphite', architecture: 'Binary',
+        description: 'Binary mixture 75/25 dense packing',
+        basePath: 'simulations/Binary/HC05/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_HC05_0p5C_custom.png', 'soc_HC05_0p5C_end.png', 'soc_HC05_0p5C_mid.png',
+            'soc_HC05_1C_custom.png', 'soc_HC05_1C_end.png',
+            'soc_HC05_2C_custom.png', 'soc_HC05_2C_end.png',
+            'soc_HC05_3C_custom.png', 'soc_HC05_3C_end.png'
+        ]
+    },
+    {
+        id: 'HC06', name: 'HC06 - Binary High Tau',
+        material: 'Graphite', architecture: 'Binary',
+        description: 'Binary mixture 75/25 high tortuosity variant',
+        basePath: 'simulations/Binary/HC06/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_HC06_0p5C_end.png', 'soc_HC06_0p5C_mid.png',
+            'soc_HC06_1C_end.png',
+            'soc_HC06_2C_end.png',
+            'soc_HC06_3C_end.png'
+        ]
+    },
+    // GRADIENT - Graphite
+    {
+        id: 'GRD01', name: 'GRD01 - 5-Particle Gradient',
+        material: 'Graphite', architecture: 'Gradient',
+        description: '5-particle gradient architecture',
+        basePath: 'simulations/gradient/GRD01/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_GRD01_0p5C_end.png', 'soc_GRD01_0p5C_mid.png',
+            'soc_GRD01_1C_end.png',
+            'soc_GRD01_2C_end.png',
+            'soc_GRD01_3C_end.png'
+        ]
+    },
+    {
+        id: 'GRD02', name: 'GRD02 - 4-Particle Gradient',
+        material: 'Graphite', architecture: 'Gradient',
+        description: '4-particle gradient architecture',
+        basePath: 'simulations/gradient/GRD02/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_GRD02_0p5C_end.png',
+            'soc_GRD02_1C_end.png',
+            'soc_GRD02_2C_end.png',
+            'soc_GRD02_3C_end.png'
+        ]
+    },
+    {
+        id: 'GRD04', name: 'GRD04 - Two-Stage Refill',
+        material: 'Graphite', architecture: 'Gradient',
+        description: 'Two-stage refill gradient',
+        basePath: 'simulations/gradient/GRD04/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_GRD04_0p5C_end.png',
+            'soc_GRD04_1C_end.png',
+            'soc_GRD04_2C_end.png',
+            'soc_GRD04_3C_end.png'
+        ]
+    },
+    {
+        id: 'GRD05', name: 'GRD05 - 6-Particle Gradient',
+        material: 'Graphite', architecture: 'Gradient',
+        description: '6-particle gradient architecture',
+        basePath: 'simulations/gradient/GRD05/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_GRD05_0p5C_end.png',
+            'soc_GRD05_1C_end.png',
+            'soc_GRD05_2C_end.png',
+            'soc_GRD05_3C_end.png'
+        ]
+    },
+    // SPHERE REFERENCE - Graphite
+    {
+        id: 'SPH010', name: 'SPH010 - Sphere Matched',
+        material: 'Graphite', architecture: 'Sphere Reference',
+        description: 'Spherical particles matched to HC01 porosity for comparison',
+        basePath: 'simulations/SPH/HC10_sphere_matched/comsol_v2_sweep_20260331_033100/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_SPH010_0p5C_end.png',
+            'soc_SPH010_1C_end.png',
+            'soc_SPH010_2C_end.png',
+            'soc_SPH010_3C_end.png'
+        ]
+    },
+    // NMC811
+    {
+        id: 'NMC01', name: 'NMC01 - Single NMC811',
+        material: 'NMC811', architecture: 'Single',
+        description: 'NMC811 cathode single template',
+        basePath: 'simulations/NMC/NMC01/comsol_v2_sweep_20260329_111342/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_NMC01_0p5C_end.png',
+            'soc_NMC01_1C_end.png',
+            'soc_NMC01_2C_end.png',
+            'soc_NMC01_3C_end.png'
+        ]
+    },
+    {
+        id: 'NMC07', name: 'NMC07 - Alternative NMC',
+        material: 'NMC811', architecture: 'Single',
+        description: 'NMC811 cathode alternative shape',
+        basePath: 'simulations/NMC/NMC07/comsol_v2_sweep_20260329_134439/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_NMC07_0p5C_end.png',
+            'soc_NMC07_1C_end.png',
+            'soc_NMC07_2C_end.png',
+            'soc_NMC07_3C_end.png'
+        ]
+    },
+    {
+        id: 'NMCMIX01', name: 'NMCMIX01 - NMC Mixed',
+        material: 'NMC811', architecture: 'Binary',
+        description: 'NMC811 cathode mixed particle types',
+        basePath: 'simulations/NMC/NMCMIX01_mixed9_equal_weight/comsol_v2_sweep_20260329_164716/',
+        crates: ['0p5C', '1C', '2C', '3C'],
+        hasSoc: true,
+        socFiles: [
+            'soc_NMCMIX01_0p5C_end.png',
+            'soc_NMCMIX01_1C_end.png',
+            'soc_NMCMIX01_2C_end.png',
+            'soc_NMCMIX01_3C_end.png'
+        ]
+    }
+];
+
+// ============================================================
+// FILTERS
+// ============================================================
+let activeFilters = {
+    material: 'all',
+    architecture: 'all'
+};
+let selectedCaseId = null;
+
+function getFilteredCases() {
+    return CASES.filter(c => {
+        if (activeFilters.material !== 'all' && c.material !== activeFilters.material) return false;
+        if (activeFilters.architecture !== 'all' && c.architecture !== activeFilters.architecture) return false;
+        return true;
+    });
+}
+
+function materialTagClass(material) {
+    return material === 'NMC811' ? 'tag-orange' : 'tag-blue';
+}
+
+function archTagClass(arch) {
+    switch (arch) {
+        case 'Single': return 'tag-green';
+        case 'Binary': return 'tag-purple';
+        case 'Gradient': return 'tag-gold';
+        case 'Sphere Reference': return 'badge';
+        default: return 'badge';
+    }
+}
+
+function formatCrate(crate) {
+    return crate.replace('p', '.').toUpperCase();
+}
+
+function hideOnError(img) {
+    img.style.display = 'none';
+    if (img.parentElement) {
+        img.parentElement.style.display = 'none';
+    }
+}
+
+// ============================================================
+// RENDER CARDS
+// ============================================================
+function renderCards() {
+    const grid = document.getElementById('case-grid');
+    const filtered = getFilteredCases();
+    grid.innerHTML = '';
+
+    filtered.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'card card-hover case-card' + (selectedCaseId === c.id ? ' selected' : '');
+        card.dataset.id = c.id;
+
+        const cratesHtml = c.crates.length > 0
+            ? c.crates.map(cr => '<span class="crate-chip">' + formatCrate(cr) + '</span>').join('')
+            : '<span class="no-data-label">Summary only</span>';
+
+        const thumbSrc = c.basePath + 'summary/crate_overlay_capacity.png';
+
+        card.innerHTML =
+            '<div class="case-card-header">' +
+                '<h3>' + c.id + '</h3>' +
+            '</div>' +
+            '<div class="case-tags">' +
+                '<span class="tag ' + materialTagClass(c.material) + '">' + c.material + '</span>' +
+                '<span class="tag ' + archTagClass(c.architecture) + '">' + c.architecture + '</span>' +
+            '</div>' +
+            '<p>' + c.description + '</p>' +
+            '<div class="case-crates">' + cratesHtml + '</div>' +
+            '<img class="case-thumb" src="' + thumbSrc + '" alt="C-rate overlay" onerror="this.style.display=\'none\'">';
+
+        card.addEventListener('click', function() {
+            selectCase(c.id);
+        });
+
+        grid.appendChild(card);
+    });
+
+    document.getElementById('visible-count').textContent =
+        'Showing ' + filtered.length + ' of ' + CASES.length + ' cases';
+}
+
+// ============================================================
+// DETAIL VIEW
+// ============================================================
+function selectCase(caseId) {
+    const c = CASES.find(x => x.id === caseId);
+    if (!c) return;
+
+    selectedCaseId = caseId;
+    renderCards();
+
+    // Title and description
+    document.getElementById('detail-title').textContent = c.name;
+    document.getElementById('detail-desc').textContent = c.description;
+
+    // Tags
+    const tagsEl = document.getElementById('detail-tags');
+    tagsEl.innerHTML =
+        '<span class="tag ' + materialTagClass(c.material) + '">' + c.material + '</span>' +
+        '<span class="tag ' + archTagClass(c.architecture) + '">' + c.architecture + '</span>' +
+        (c.crates.length > 0
+            ? c.crates.map(cr => '<span class="crate-chip">' + formatCrate(cr) + '</span>').join('')
+            : '');
+
+    // Summary images
+    const summaryGrid = document.getElementById('summary-grid');
+    const summaryImages = [
+        { label: 'C-Rate Overlay (Capacity)', file: 'crate_overlay_capacity.png' },
+        { label: 'C-Rate Overlay (Time)', file: 'crate_overlay_time.png' },
+        { label: 'Ragone Plot', file: 'ragone_plot.png' },
+        { label: 'Specific Energy', file: 'specific_energy.png' }
+    ];
+    summaryGrid.innerHTML = summaryImages.map(function(img) {
+        return '<div class="summary-img-wrap">' +
+            '<div class="img-label">' + img.label + '</div>' +
+            '<img src="' + c.basePath + 'summary/' + img.file + '" alt="' + img.label + '" onerror="hideOnError(this)">' +
+        '</div>';
+    }).join('');
+
+    // SOC contours
+    const socSection = document.getElementById('soc-section');
+    const socGrid = document.getElementById('soc-grid');
+    if (c.hasSoc && c.socFiles.length > 0) {
+        socSection.style.display = 'block';
+        socGrid.innerHTML = c.socFiles.map(function(f) {
+            var label = f.replace('.png', '').replace('soc_', '').replace(/_/g, ' ');
+            return '<div class="soc-img-wrap">' +
+                '<img src="' + c.basePath + 'soc_plots/' + f + '" alt="' + label + '" onerror="hideOnError(this)">' +
+                '<div class="soc-label">' + label + '</div>' +
+            '</div>';
+        }).join('');
+    } else {
+        socSection.style.display = 'none';
+        socGrid.innerHTML = '';
+    }
+
+    // Per C-rate results
+    var crateSection = document.getElementById('crate-results');
+    var crateGrid = document.getElementById('crate-results-grid');
+    if (c.crates.length > 0) {
+        crateSection.style.display = 'block';
+        crateGrid.innerHTML = c.crates.map(function(cr) {
+            return '<div class="crate-result-card">' +
+                '<div class="crate-label">' + formatCrate(cr) + '</div>' +
+                '<img src="' + c.basePath + 'results/run_' + cr + '/capacity_voltage.png" alt="Capacity-Voltage ' + formatCrate(cr) + '" onerror="hideOnError(this)">' +
+                '<div style="margin-top: 8px;">' +
+                    '<img src="' + c.basePath + 'results/run_' + cr + '/voltage_time.png" alt="Voltage-Time ' + formatCrate(cr) + '" onerror="hideOnError(this)">' +
+                '</div>' +
+            '</div>';
+        }).join('');
+    } else {
+        crateSection.style.display = 'none';
+        crateGrid.innerHTML = '';
+    }
+
+    // Show detail section and scroll
+    var detailEl = document.getElementById('detail-section');
+    detailEl.classList.add('visible');
+    detailEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeDetail() {
+    selectedCaseId = null;
+    document.getElementById('detail-section').classList.remove('visible');
+    renderCards();
+}
+
+// ============================================================
+// FILTER HANDLERS
+// ============================================================
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        var filterType = this.dataset.filter;
+        var value = this.dataset.value;
+        activeFilters[filterType] = value;
+
+        // Update active state within same group
+        var group = this.parentElement;
+        group.querySelectorAll('.filter-btn').forEach(function(b) {
+            b.classList.remove('active');
+        });
+        this.classList.add('active');
+
+        // Close detail if the selected case is now filtered out
+        if (selectedCaseId) {
+            var filtered = getFilteredCases();
+            if (!filtered.find(function(c) { return c.id === selectedCaseId; })) {
+                closeDetail();
+            }
+        }
+
+        renderCards();
+    });
+});
+
+document.getElementById('detail-close').addEventListener('click', closeDetail);
+
+// ============================================================
+// INIT
+// ============================================================
+renderCards();
+
+// Fade-in observer
+var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(e) {
+        if (e.isIntersecting) e.target.classList.add('visible');
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(function(el) {
+    observer.observe(el);
+});
+</script>
+
+</body>
+</html>

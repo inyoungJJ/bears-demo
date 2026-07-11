@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Data-Driven Prognostics - BEARS</title>
+<link rel="stylesheet" href="bears-theme.css" />
+<style>
+.page-header { padding: 100px 28px 18px; text-align: center; }
+.page-header h1 { font-size: clamp(24px, 3vw, 36px); font-weight: 800; margin-bottom: 8px; }
+.page-header p { font-size: 14.5px; color: var(--text-dim); max-width: 900px; margin: 0 auto; line-height: 1.65; }
+.dd-wrap { max-width: 1180px; margin: 0 auto; padding: 8px 20px 56px; }
+.dd-section { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 26px 28px; margin-top: 18px; }
+.dd-kicker { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 8px; }
+.dd-section h2 { font-size: 19px; font-weight: 800; margin: 0 0 10px; }
+.dd-section p { font-size: 14px; line-height: 1.7; color: var(--text-dim); margin: 0 0 10px; }
+.dd-section b { color: var(--text); }
+.dd-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-top: 16px; }
+.dd-card { border: 1px solid var(--border); border-radius: var(--radius-sm); background: #fff; padding: 20px 22px; }
+.dd-card .tag { display: inline-block; font-size: 10.5px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; margin-bottom: 10px; }
+.t-blue { background: rgba(122,162,247,0.18); color: #2a6cb6; }
+.t-green { background: rgba(158,206,106,0.22); color: #3f7d20; }
+.t-orange { background: rgba(224,175,104,0.25); color: #a3611a; }
+.t-purple { background: rgba(155,120,220,0.18); color: #6a3fb0; }
+.dd-card h3 { font-size: 15px; font-weight: 800; margin: 0 0 8px; }
+.dd-card p { font-size: 13.5px; line-height: 1.65; color: var(--text-dim); margin: 0; }
+.pipeline { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-top: 16px; }
+.pipe-step { flex: 1; min-width: 150px; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 14px; text-align: center; }
+.pipe-step .n { width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 800; font-size: 13px; line-height: 26px; margin: 0 auto 8px; }
+.pipe-step h4 { font-size: 13.5px; font-weight: 800; margin: 0 0 5px; }
+.pipe-step p { font-size: 12px; color: var(--text-dim); margin: 0; line-height: 1.5; }
+.pipe-arrow { align-self: center; color: var(--accent); font-size: 20px; font-weight: 700; }
+.fig-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-top: 16px; }
+.fig-card { border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: #fff; }
+.fig-card img { width: 100%; display: block; }
+.fig-ph { width: 100%; aspect-ratio: 16/10; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: repeating-linear-gradient(45deg, rgba(42,108,182,0.03), rgba(42,108,182,0.03) 12px, rgba(42,108,182,0.06) 12px, rgba(42,108,182,0.06) 24px); color: var(--text-dim); text-align: center; padding: 20px; }
+.fig-ph .icon { font-size: 26px; opacity: 0.5; }
+.fig-ph .lbl { font-size: 12.5px; font-weight: 700; color: var(--accent); }
+.fig-ph .sub { font-size: 11.5px; color: var(--text-dim); max-width: 260px; line-height: 1.5; }
+.fig-cap { font-size: 12px; color: var(--text-dim); padding: 10px 14px; background: var(--bg); border-top: 1px solid var(--border); line-height: 1.5; }
+.stats-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 16px; }
+.stat { flex: 1; min-width: 150px; text-align: center; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px 10px; background: #fff; }
+.stat .n { font-size: 26px; font-weight: 800; color: var(--accent); }
+.stat .l { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.takeaway { border-left: 4px solid var(--accent); background: rgba(42,108,182,0.06); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 18px; margin-top: 14px; }
+.takeaway p { margin: 0 0 6px; color: var(--text); font-size: 13.5px; }
+.limits { border-left: 4px solid #a3611a; background: rgba(224,175,104,0.08); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; padding: 14px 18px; margin-top: 14px; }
+.limits p { margin: 0 0 6px; color: var(--text); font-size: 13.5px; }
+</style>
+</head>
+<body class="bears-page">
+<nav class="bears-nav">
+    <div class="nav-logos">
+        <img src="cau_logo.svg" alt="CAU" class="cau-logo">
+        <a href="https://sites.google.com/view/memlab/meml" target="_blank"><img src="memlab_logo.png" alt="MEMLab"></a>
+    </div>
+    <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="agents.html">Agents & Skills</a>
+        <a href="particles.html">Particles</a>
+        <a href="electrodes.html">Electrodes</a>
+        <a href="simulations.html">Simulations</a>
+        <a href="datadriven.html" class="active">Prognostics</a>
+        <a href="index.html#team">Team</a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>Data-Driven Battery Prognostics</h1>
+    <p>Beyond building electrodes, BEARS predicts how a cell <b>ages</b>. A physics-based degradation
+    digital twin is calibrated against real cycling data to forecast capacity fade, remaining useful life,
+    and the <b>&ldquo;knee&rdquo;</b> &mdash; the sudden onset of accelerated aging that ends a battery&rsquo;s life.</p>
+</div>
+
+<div class="dd-wrap">
+
+<!-- What it does -->
+<div class="dd-section">
+    <div class="dd-kicker">Overview</div>
+    <h2>Mechanistic, not black-box</h2>
+    <p>Most life-prediction tools are purely statistical: they fit a curve and extrapolate. BEARS couples a
+    <b>physics-based cell model</b> with data. Capacity fade emerges from real degradation mechanisms &mdash;
+    solid-electrolyte-interphase (SEI) growth, lithium plating, loss of active material, and particle-level
+    stress &mdash; so the forecast carries a mechanistic explanation, not just a trend line. The model is then
+    <b>calibrated against measured cycling data</b> from commercial cells, and used to project health forward.</p>
+    <div class="stats-row">
+        <div class="stat"><div class="n">4</div><div class="l">Degradation mechanisms</div></div>
+        <div class="stat"><div class="n">&lt;1%</div><div class="l">Retention fit error (RMSE)</div></div>
+        <div class="stat"><div class="n">Knee</div><div class="l">Accelerated-aging onset</div></div>
+        <div class="stat"><div class="n">12/12</div><div class="l">Cells captured, one coefficient each</div></div>
+    </div>
+</div>
+
+<!-- Capabilities -->
+<div class="dd-section">
+    <div class="dd-kicker">Capabilities</div>
+    <h2>What the prognostics engine can do</h2>
+    <div class="dd-grid">
+        <div class="dd-card">
+            <span class="tag t-blue">Physics</span>
+            <h3>Mechanistic degradation</h3>
+            <p>Capacity loss is resolved into its physical drivers &mdash; SEI growth, lithium plating and its
+            partial recovery, dead-lithium accumulation, loss of active material, and porosity change &mdash;
+            each tracked cycle by cycle.</p>
+        </div>
+        <div class="dd-card">
+            <span class="tag t-green">Calibration</span>
+            <h3>Fit to real cycling data</h3>
+            <p>The digital twin is tuned to public fast-charge cycling datasets of commercial LFP/graphite cells,
+            matching the measured capacity-retention curve across hundreds of cycles.</p>
+        </div>
+        <div class="dd-card">
+            <span class="tag t-orange">Prediction</span>
+            <h3>Knee &amp; end-of-life</h3>
+            <p>The engine reproduces the characteristic flat-then-accelerating fade and locates the knee point,
+            the practical signal for when a pack should be retired.</p>
+        </div>
+        <div class="dd-card">
+            <span class="tag t-purple">Variability</span>
+            <h3>Cell-to-cell spread</h3>
+            <p>Nominally identical cells age at different rates. A single mechanistic knob spans the observed
+            cell-to-cell lifetime band, giving realistic best/worst-case envelopes.</p>
+        </div>
+        <div class="dd-card">
+            <span class="tag t-blue">Transfer</span>
+            <h3>Across charging protocols</h3>
+            <p>One calibrated model form transfers across cells and fast-charge policies with minimal
+            retuning, rather than refitting a new black box for every condition.</p>
+        </div>
+        <div class="dd-card">
+            <span class="tag t-green">Diagnostics</span>
+            <h3>Internal state trajectories</h3>
+            <p>Beyond capacity, the model exposes the hidden state &mdash; SEI thickness, dead-lithium, porosity,
+            active-material loss &mdash; explaining <i>why</i> a given cell is fading.</p>
+        </div>
+    </div>
+</div>
+
+<!-- How it works -->
+<div class="dd-section">
+    <div class="dd-kicker">Workflow</div>
+    <h2>From cycling data to a life forecast</h2>
+    <div class="pipeline">
+        <div class="pipe-step"><div class="n">1</div><h4>Measured data</h4><p>Capacity-vs-cycle from real cells under a fast-charge protocol</p></div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step"><div class="n">2</div><h4>Physics model</h4><p>Cell model with SEI, plating, material-loss and stress sub-models</p></div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step"><div class="n">3</div><h4>Calibration</h4><p>Mechanism strengths tuned to reproduce the measured fade</p></div>
+        <div class="pipe-arrow">&rarr;</div>
+        <div class="pipe-step"><div class="n">4</div><h4>Forecast</h4><p>RUL, knee onset, and internal-state trajectories projected forward</p></div>
+    </div>
+</div>
+
+<!-- Figures (to be completed on the data machine) -->
+<div class="dd-section">
+    <div class="dd-kicker">Results</div>
+    <h2>Selected results</h2>
+    <p>The figures below are generated from the BEARS prognostics workspace: a physics-based digital twin
+    calibrated against a public fast-charge cycling dataset of commercial LFP/graphite cells.</p>
+    <div class="fig-grid">
+        <!-- FIGURE SLOT 1: capacity retention fit. Replace .fig-ph with <img src="gallery/dd_retention_fit.png"> -->
+        <div class="fig-card">
+            <img src="gallery/dd_retention_fit.png" alt="Capacity retention: calibrated model vs measured">
+            <div class="fig-cap">Calibrated digital twin reproduces the measured capacity-retention curve of a commercial LFP/graphite cell.</div>
+        </div>
+        <!-- FIGURE SLOT 2: knee reproduction -->
+        <div class="fig-card">
+            <img src="gallery/dd_knee.png" alt="Accelerated-aging knee reproduced by the mechanistic model">
+            <div class="fig-cap">The characteristic accelerated-aging knee, reproduced from first-principles degradation mechanisms.</div>
+        </div>
+        <!-- FIGURE SLOT 3: cell-to-cell band -->
+        <div class="fig-card">
+            <img src="gallery/dd_cell_band.png" alt="Cell-to-cell lifetime spread captured by one severity coefficient">
+            <div class="fig-cap">Best/worst-case lifetime envelope from cell-to-cell variability in a single mechanism.</div>
+        </div>
+        <!-- FIGURE SLOT 4: internal state trajectories -->
+        <div class="fig-card">
+            <img src="gallery/dd_states.png" alt="Internal degradation states: SEI growth, dead lithium, porosity">
+            <div class="fig-cap">Hidden degradation state exposed by the model, explaining the source of fade.</div>
+        </div>
+    </div>
+</div>
+
+<!-- Honest limitations -->
+<div class="dd-section">
+    <div class="dd-kicker">Honesty</div>
+    <h2>What it does and does not claim</h2>
+    <div class="takeaway">
+        <p><b>Grounded:</b> the fade magnitude, knee onset, cell-to-cell band, and mechanism trajectories are
+        calibrated to real measured data with a mechanistic model, not an unconstrained curve fit.</p>
+    </div>
+    <div class="limits">
+        <p><b>Limits (stated openly):</b> the very sharpest terminal knees are steeper than a homogenized cell
+        model naturally produces; and early-cycle life is fundamentally hard to predict &mdash; a physics-consistent
+        limit, not a bug. These are reported rather than hidden.</p>
+    </div>
+</div>
+
+</div>
+</body>
+</html>
